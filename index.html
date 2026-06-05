@@ -148,13 +148,15 @@
 
             /* Renda e investimento */
             .income-row { flex-wrap: wrap; gap: 8px; }
-            .income-row input { width: 100%; }
+            .income-row input { width: 100% !important; }
+            .income-row .btn-primary { width: 100%; text-align: center; }
             .invest-input-row { flex-wrap: wrap; gap: 8px; }
-            .invest-input-row input { width: 100%; }
-            .btn-primary { width: 100%; text-align: center; }
+            .invest-input-row label { width: 100%; }
+            .invest-input-row input { width: 100% !important; }
+            .invest-input-row .btn-primary { width: 100%; text-align: center; }
 
-            /* Tabelas — scroll horizontal */
-            .card { overflow-x: auto; }
+            /* Tabelas — scroll horizontal em wrapper próprio */
+            .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
             table { min-width: 420px; }
             thead th { font-size: 0.7rem; padding: 8px 6px; }
             tbody td { padding: 6px 6px; font-size: 0.8rem; }
@@ -387,7 +389,7 @@
             <div class="card">
                 <div class="card-title">Contas Fixas</div>
                 <p class="card-hint">Aparecem automaticamente todo mês</p>
-                <table>
+                <div class="table-scroll"><table>
                     <thead>
                         <tr>
                             <th>Conta</th>
@@ -403,12 +405,12 @@
                             <td></td>
                         </tr>
                     </tfoot>
-                </table>
+                </table></div>
                 <button class="btn-add" onclick="addFixedRow('gabriel')">+ Adicionar conta fixa</button>
             </div>
             <div class="card">
                 <div class="card-title">Gastos do mês</div>
-                <table>
+                <div class="table-scroll"><table>
                     <thead>
                         <tr>
                             <th style="width:120px">Data</th>
@@ -426,7 +428,7 @@
                             <td></td>
                         </tr>
                     </tfoot>
-                </table>
+                </table></div>
                 <button class="btn-add" onclick="addRow('gabriel')">+ Adicionar gasto</button>
             </div>
             <div class="card">
@@ -509,7 +511,7 @@
             <div class="card">
                 <div class="card-title">Contas Fixas</div>
                 <p class="card-hint">Aparecem automaticamente todo mês</p>
-                <table>
+                <div class="table-scroll"><table>
                     <thead>
                         <tr>
                             <th>Conta</th>
@@ -525,12 +527,12 @@
                             <td></td>
                         </tr>
                     </tfoot>
-                </table>
+                </table></div>
                 <button class="btn-add" onclick="addFixedRow('luah')">+ Adicionar conta fixa</button>
             </div>
             <div class="card">
                 <div class="card-title">Gastos do mês</div>
-                <table>
+                <div class="table-scroll"><table>
                     <thead>
                         <tr>
                             <th style="width:120px">Data</th>
@@ -548,7 +550,7 @@
                             <td></td>
                         </tr>
                     </tfoot>
-                </table>
+                </table></div>
                 <button class="btn-add" onclick="addRow('luah')">+ Adicionar gasto</button>
             </div>
             <div class="card">
@@ -615,7 +617,7 @@
             <div class="card">
                 <div class="card-title">Contas da casa</div>
                 <p class="card-hint">Aparecem todo mês automaticamente — edite o valor mês a mês se precisar</p>
-                <table>
+                <div class="table-scroll"><table>
                     <thead>
                         <tr>
                             <th>Conta</th>
@@ -634,13 +636,13 @@
                             <td colspan="4"></td>
                         </tr>
                     </tfoot>
-                </table>
+                </table></div>
                 <button class="btn-add" onclick="addNosFixedRow()">+ Adicionar conta da casa</button>
             </div>
             <div class="card">
                 <div class="card-title">Gastos extras do mês</div>
                 <p class="card-hint">Somente para este mês — registre quem pagou cada item</p>
-                <table>
+                <div class="table-scroll"><table>
                     <thead>
                         <tr>
                             <th>Descrição</th>
@@ -657,7 +659,7 @@
                             <td colspan="2"></td>
                         </tr>
                     </tfoot>
-                </table>
+                </table></div>
                 <button class="btn-add" onclick="addNosExtraRow()">+ Adicionar gasto extra</button>
             </div>
             <div class="card">
