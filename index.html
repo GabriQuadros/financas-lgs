@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanças — Gabriel & Luah</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            color: #333;
+        }
+
+        /* LOGIN */
+        #login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a2e;
+        }
+
+        .login-box {
+            background: white;
+            border-radius: 14px;
+            padding: 40px 36px;
+            width: 340px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .login-box h1 { font-size: 1.2rem; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+        .login-box p { font-size: 0.82rem; color: #888; margin-bottom: 28px; }
+
+        .login-field { margin-bottom: 16px; }
+        .login-field label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 6px; }
+        .login-field input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 7px; font-size: 0.9rem; }
+        .login-field input:focus { outline: none; border-color: #1a1a2e; }
+
+        .btn-login { width: 100%; padding: 11px; background: #1a1a2e; color: white; border: none; border-radius: 7px; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+        .btn-login:hover { background: #0f3460; }
+        .btn-login:disabled { opacity: 0.6; cursor: default; }
+        .login-error { margin-top: 12px; font-size: 0.8rem; color: #e94560; text-align: center; min-height: 18px; }
+
+        /* APP */
+        #app-screen { display: none; }
+
+        .header { background: #1a1a2e; color: white; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { font-size: 1.05rem; font-weight: 600; }
+        .header-right { display: flex; align-items: center; gap: 14px; }
+        .user-badge { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+        .user-badge span { color: white; font-weight: 600; }
+        .status-msg { font-size: 0.78rem; font-weight: 500; min-width: 80px; text-align: right; }
+        .btn-logout { padding: 5px 12px; background: transparent; color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; font-size: 0.78rem; }
+        .btn-logout:hover { color: white; border-color: rgba(255,255,255,0.5); }
+
+        .tabs { background: #16213e; display: flex; padding: 0 28px; gap: 4px; }
+        .tab { padding: 13px 28px; color: rgba(255,255,255,0.55); cursor: pointer; border-bottom: 3px solid transparent; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; user-select: none; }
+        .tab:hover { color: rgba(255,255,255,0.85); }
+        .tab.active { color: white; border-bottom-color: #e94560; }
+
+        .content { padding: 28px; max-width: 860px; margin: 0 auto; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        .month-row { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
+        .month-row label { font-size: 0.85rem; color: #666; font-weight: 500; }
+        .month-row select { padding: 7px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.88rem; background: white; cursor: pointer; }
+
+        .card { background: white; border-radius: 10px; padding: 20px 22px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+        .card-title { font-size: 0.85rem; font-weight: 600; color: #1a1a2e; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+
+        .card-hint { font-size: 0.78rem; color: #aaa; margin-bottom: 12px; margin-top: -10px; }
+
+        .income-row { display: flex; align-items: center; gap: 10px; }
+        .income-row label { font-size: 0.88rem; color: #666; }
+        .income-row input { padding: 7px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; width: 160px; }
+
+        .btn-primary { padding: 8px 18px; background: #1a1a2e; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.84rem; font-weight: 500; }
+        .btn-primary:hover { background: #0f3460; }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead th { text-align: left; padding: 9px 10px; font-size: 0.76rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 2px solid #f0f0f0; }
+        tbody td { padding: 7px 10px; border-bottom: 1px solid #f5f5f5; font-size: 0.88rem; }
+        tbody td input[type="text"], tbody td input[type="number"], tbody td input[type="date"] { width: 100%; padding: 5px 8px; border: 1px solid #e5e5e5; border-radius: 5px; font-size: 0.84rem; background: #fafafa; }
+        tbody td input:focus { outline: none; border-color: #1a1a2e; background: white; }
+        tbody td select { width: 100%; padding: 5px 8px; border: 1px solid #e5e5e5; border-radius: 5px; font-size: 0.84rem; background: #fafafa; }
+        tfoot td { padding: 10px 10px; font-size: 0.88rem; font-weight: 600; background: #f8f9fa; border-top: 2px solid #eee; }
+
+        .btn-add { margin-top: 12px; padding: 7px 16px; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; border-radius: 6px; cursor: pointer; font-size: 0.83rem; font-weight: 500; }
+        .btn-add:hover { background: #c8e6c9; }
+
+        .btn-remove { padding: 3px 8px; background: #ffeaea; color: #c62828; border: 1px solid #ffcdd2; border-radius: 4px; cursor: pointer; font-size: 0.78rem; }
+        .btn-remove:hover { background: #ffcdd2; }
+
+        /* CHART TOGGLE */
+        .chart-toggle { display: flex; gap: 4px; }
+        .toggle-btn { padding: 4px 12px; border: 1px solid #ddd; border-radius: 5px; background: white; font-size: 0.76rem; font-weight: 500; cursor: pointer; color: #666; text-transform: none; letter-spacing: 0; }
+        .toggle-btn.active { background: #1a1a2e; color: white; border-color: #1a1a2e; }
+        .chart-empty { text-align: center; color: #bbb; font-size: 0.85rem; padding: 32px 0; }
+
+        /* NOS */
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+        .summary-card { background: white; border-radius: 10px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .summary-card.dark { background: #1a1a2e; }
+        .summary-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: #999; margin-bottom: 6px; }
+        .summary-card.dark .summary-label { color: rgba(255,255,255,0.5); }
+        .summary-value { font-size: 1.3rem; font-weight: 700; color: #1a1a2e; }
+        .summary-card.dark .summary-value { color: white; }
+        .division-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 4px; }
+        .division-person { background: #f8f9fa; border-radius: 8px; padding: 18px; text-align: center; }
+        .division-name { font-size: 0.82rem; color: #777; font-weight: 500; margin-bottom: 4px; }
+        .division-pct { font-size: 1rem; font-weight: 600; color: #555; margin-bottom: 4px; }
+        .division-amount { font-size: 1.5rem; font-weight: 700; color: #e94560; }
+
+        input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+
+        /* NOS SPLITS */
+        .split-cell { font-size: 0.82rem; color: #666; text-align: center; white-space: nowrap; }
+        .balance-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; }
+        .balance-row:last-of-type { border-bottom: none; }
+        .balance-result { margin-top: 14px; text-align: center; font-size: 1rem; font-weight: 700; padding: 12px; border-radius: 8px; background: #f8f9fa; }
+        body.dark .split-cell { color: #666; }
+        body.dark .balance-row { border-bottom-color: #1e1e38; }
+        body.dark .balance-result { background: #0d0d1a; }
+
+        /* THEME BUTTON */
+        .btn-theme { padding: 5px 9px; background: transparent; border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; font-size: 1rem; line-height: 1; }
+        .btn-theme:hover { border-color: rgba(255,255,255,0.5); }
+
+        /* DARK MODE */
+        body.dark { background: #0d0d1a; color: #ccc; }
+        body.dark .header { background: #080810; }
+        body.dark .tabs { background: #0a0a18; }
+        body.dark .tab { color: rgba(255,255,255,0.4); }
+        body.dark .tab.active { color: white; }
+        body.dark .card { background: #13132a; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+        body.dark .card-title { color: #ddd; }
+        body.dark .card-hint { color: #555; }
+        body.dark .stat-card { background: #13132a; }
+        body.dark .stat-value { color: #e0e0e0; }
+        body.dark .stat-label { color: #555; }
+        body.dark .stat-sub { color: #444; }
+        body.dark .summary-card { background: #13132a; }
+        body.dark .summary-value { color: #e0e0e0; }
+        body.dark .summary-label { color: rgba(255,255,255,0.35); }
+        body.dark .division-person { background: #0d0d1a; }
+        body.dark .division-name { color: #666; }
+        body.dark .month-row label { color: #888; }
+        body.dark .month-row select { background: #13132a; border-color: #2a2a45; color: #ccc; }
+        body.dark .income-row label { color: #888; }
+        body.dark .income-row input { background: #0d0d1a; border-color: #2a2a45; color: #ccc; }
+        body.dark thead th { color: #555; border-bottom-color: #1e1e38; }
+        body.dark tbody td { border-bottom-color: #181830; }
+        body.dark tbody td input, body.dark tbody td select { background: #0d0d1a; border-color: #2a2a45; color: #ccc; }
+        body.dark tfoot td { background: #0d0d1a; color: #aaa; border-top-color: #1e1e38; }
+        body.dark .btn-add { background: #0d1a10; color: #4a9d5a; border-color: #1a3320; }
+        body.dark .btn-add:hover { background: #122018; }
+        body.dark .btn-remove { background: #1a0d0d; color: #c62828; border-color: #2a1515; }
+        body.dark .tier-btn { background: #0d0d1a; border-color: #2a2a45; }
+        body.dark .tier-btn.active { background: #0e0e28; border-color: #3a3a6a; }
+        body.dark .tier-btn.recommended { border-color: #4a1a28; }
+        body.dark .tier-btn.recommended.active { border-color: #e94560; background: #1a0d12; }
+        body.dark .tier-pct { color: #ddd; }
+        body.dark .tier-label { color: #555; }
+        body.dark .tier-val { color: #999; }
+        body.dark .invest-input-row label { color: #888; }
+        body.dark .invest-input-row input { background: #0d0d1a; border-color: #2a2a45; color: #ccc; }
+        body.dark .toggle-btn { background: #13132a; border-color: #2a2a45; color: #666; }
+        body.dark .toggle-btn.active { background: #0f3460; color: white; border-color: #0f3460; }
+        body.dark .chart-empty { color: #444; }
+        body.dark .login-box { background: #13132a; }
+        body.dark .login-box h1 { color: #e0e0e0; }
+        body.dark .login-box p { color: #555; }
+        body.dark .login-field label { color: #888; }
+        body.dark .login-field input { background: #0d0d1a; border-color: #2a2a45; color: #ccc; }
+        body.dark .btn-primary { background: #0f3460; }
+        body.dark .btn-primary:hover { background: #1a4a80; }
+
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+        .stat-card { background: white; border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .stat-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: #999; margin-bottom: 6px; }
+        .stat-value { font-size: 1.05rem; font-weight: 700; color: #1a1a2e; }
+        .stat-sub { font-size: 0.7rem; color: #bbb; margin-top: 3px; }
+        .stat-diff { font-size: 0.72rem; font-weight: 600; margin-top: 3px; }
+
+        /* INVESTIMENTOS */
+        .invest-tiers { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+
+        .tier-btn {
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 14px 8px 12px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .tier-btn:hover { border-color: #aaa; }
+        .tier-btn.active { border-color: #1a1a2e; background: #f0f2f8; }
+        .tier-btn.recommended { border-color: #f5c0cb; }
+        .tier-btn.recommended.active { border-color: #e94560; background: #fff5f7; }
+
+        .tier-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e94560;
+            color: white;
+            font-size: 0.63rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .tier-pct { font-size: 1.15rem; font-weight: 700; color: #1a1a2e; margin-top: 4px; }
+        .tier-label { font-size: 0.7rem; color: #888; font-weight: 500; }
+        .tier-val { font-size: 0.82rem; font-weight: 600; color: #555; margin-top: 2px; }
+
+        .invest-input-row { display: flex; align-items: center; gap: 10px; }
+        .invest-input-row label { font-size: 0.88rem; color: #666; white-space: nowrap; }
+        .invest-input-row input { padding: 7px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; width: 160px; }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+    <div class="login-box">
+        <h1>💰 Finanças</h1>
+        <p>Gabriel & Luah</p>
+        <div class="login-field">
+            <label>E-mail</label>
+            <input type="email" id="login-email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter') doLogin()">
+        </div>
+        <div class="login-field">
+            <label>Senha</label>
+            <input type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()">
+        </div>
+        <button class="btn-login" id="btn-login" onclick="doLogin()">Entrar</button>
+        <div class="login-error" id="login-error"></div>
+    </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+    <div class="header">
+        <h1>💰 Finanças — Gabriel & Luah</h1>
+        <div class="header-right">
+            <span class="status-msg" id="status-msg"></span>
+            <span class="user-badge">Olá, <span id="user-name"></span></span>
+            <button class="btn-theme" id="btn-theme" onclick="toggleTheme()">🌙</button>
+            <button class="btn-logout" onclick="doLogout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('gabriel')">Gabriel</div>
+        <div class="tab" onclick="switchTab('luah')">Luah</div>
+        <div class="tab" onclick="switchTab('nos')">NOS</div>
+    </div>
+
+    <div class="content">
+
+        <!-- GABRIEL -->
+        <div id="pane-gabriel" class="tab-pane active">
+            <div class="month-row">
+                <label>Mês:</label>
+                <select id="gabriel-month" onchange="loadGabriel()"></select>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Mês anterior</div>
+                    <div class="stat-value" id="gabriel-stat-prev">R$ 0,00</div>
+                    <div class="stat-diff" id="gabriel-stat-prev-diff"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Média salarial</div>
+                    <div class="stat-value" id="gabriel-stat-avg">R$ 0,00</div>
+                    <div class="stat-sub">todos os meses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total investido</div>
+                    <div class="stat-value" id="gabriel-stat-invested">R$ 0,00</div>
+                    <div class="stat-sub">todos os meses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label" id="gabriel-stat-saldo-label">Saldo livre</div>
+                    <div class="stat-value" id="gabriel-stat-saldo">R$ 0,00</div>
+                    <div class="stat-sub">este mês</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Renda do mês</div>
+                <div class="income-row">
+                    <label>Valor (R$):</label>
+                    <input type="number" id="gabriel-income" placeholder="0,00" step="0.01" oninput="updateTierValues('gabriel');calcSaldo('gabriel')">
+                    <button class="btn-primary" onclick="saveGabrielIncome()">Salvar</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Contas Fixas</div>
+                <p class="card-hint">Aparecem automaticamente todo mês</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Conta</th>
+                            <th style="width:140px">Valor (R$)</th>
+                            <th style="width:40px"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="gabriel-fixed-tbody"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td>Total</td>
+                            <td id="gabriel-fixed-total">R$ 0,00</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button class="btn-add" onclick="addFixedRow('gabriel')">+ Adicionar conta fixa</button>
+            </div>
+            <div class="card">
+                <div class="card-title">Gastos do mês</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:120px">Data</th>
+                            <th style="width:145px">Categoria</th>
+                            <th>Descrição</th>
+                            <th style="width:120px">Valor (R$)</th>
+                            <th style="width:40px"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="gabriel-tbody"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3">Total</td>
+                            <td id="gabriel-total">R$ 0,00</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button class="btn-add" onclick="addRow('gabriel')">+ Adicionar gasto</button>
+            </div>
+            <div class="card">
+                <div class="card-title">Investimentos</div>
+                <div class="invest-tiers" id="gabriel-tiers">
+                    <button class="tier-btn" onclick="selectTier('gabriel',10)">
+                        <span class="tier-pct">10%</span>
+                        <span class="tier-label">Início</span>
+                        <span class="tier-val" id="gabriel-tier-10">R$ 0,00</span>
+                    </button>
+                    <button class="tier-btn recommended active" onclick="selectTier('gabriel',20)">
+                        <span class="tier-badge">Recomendado</span>
+                        <span class="tier-pct">20%</span>
+                        <span class="tier-label">Moderado</span>
+                        <span class="tier-val" id="gabriel-tier-20">R$ 0,00</span>
+                    </button>
+                    <button class="tier-btn" onclick="selectTier('gabriel',30)">
+                        <span class="tier-pct">30%</span>
+                        <span class="tier-label">Agressivo</span>
+                        <span class="tier-val" id="gabriel-tier-30">R$ 0,00</span>
+                    </button>
+                </div>
+                <div class="invest-input-row">
+                    <label>Investido este mês (R$):</label>
+                    <input type="number" id="gabriel-investment" placeholder="0,00" step="0.01" oninput="updateChart('gabriel')">
+                    <button class="btn-primary" onclick="saveInvestment('gabriel')">Salvar</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">
+                    Distribuição dos gastos
+                    <div class="chart-toggle">
+                        <button class="toggle-btn active" id="gabriel-toggle-month" onclick="setChartMode('gabriel','month')">Este mês</button>
+                        <button class="toggle-btn" id="gabriel-toggle-all" onclick="setChartMode('gabriel','all')">Total geral</button>
+                    </div>
+                </div>
+                <div style="max-width:280px;margin:8px auto 0">
+                    <canvas id="gabriel-chart"></canvas>
+                    <div id="gabriel-chart-empty" class="chart-empty" style="display:none">Nenhum gasto registrado ainda</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LUAH -->
+        <div id="pane-luah" class="tab-pane">
+            <div class="month-row">
+                <label>Mês:</label>
+                <select id="luah-month" onchange="loadLuah()"></select>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Mês anterior</div>
+                    <div class="stat-value" id="luah-stat-prev">R$ 0,00</div>
+                    <div class="stat-diff" id="luah-stat-prev-diff"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Média salarial</div>
+                    <div class="stat-value" id="luah-stat-avg">R$ 0,00</div>
+                    <div class="stat-sub">todos os meses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total investido</div>
+                    <div class="stat-value" id="luah-stat-invested">R$ 0,00</div>
+                    <div class="stat-sub">todos os meses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label" id="luah-stat-saldo-label">Saldo livre</div>
+                    <div class="stat-value" id="luah-stat-saldo">R$ 0,00</div>
+                    <div class="stat-sub">este mês</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Renda do mês</div>
+                <div class="income-row">
+                    <label>Valor (R$):</label>
+                    <input type="number" id="luah-income" placeholder="0,00" step="0.01" oninput="updateTierValues('luah');calcSaldo('luah')">
+                    <button class="btn-primary" onclick="saveLuahIncome()">Salvar</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Contas Fixas</div>
+                <p class="card-hint">Aparecem automaticamente todo mês</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Conta</th>
+                            <th style="width:140px">Valor (R$)</th>
+                            <th style="width:40px"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="luah-fixed-tbody"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td>Total</td>
+                            <td id="luah-fixed-total">R$ 0,00</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button class="btn-add" onclick="addFixedRow('luah')">+ Adicionar conta fixa</button>
+            </div>
+            <div class="card">
+                <div class="card-title">Gastos do mês</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:120px">Data</th>
+                            <th style="width:145px">Categoria</th>
+                            <th>Descrição</th>
+                            <th style="width:120px">Valor (R$)</th>
+                            <th style="width:40px"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="luah-tbody"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3">Total</td>
+                            <td id="luah-total">R$ 0,00</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button class="btn-add" onclick="addRow('luah')">+ Adicionar gasto</button>
+            </div>
+            <div class="card">
+                <div class="card-title">Investimentos</div>
+                <div class="invest-tiers" id="luah-tiers">
+                    <button class="tier-btn" onclick="selectTier('luah',10)">
+                        <span class="tier-pct">10%</span>
+                        <span class="tier-label">Início</span>
+                        <span class="tier-val" id="luah-tier-10">R$ 0,00</span>
+                    </button>
+                    <button class="tier-btn recommended active" onclick="selectTier('luah',20)">
+                        <span class="tier-badge">Recomendado</span>
+                        <span class="tier-pct">20%</span>
+                        <span class="tier-label">Moderado</span>
+                        <span class="tier-val" id="luah-tier-20">R$ 0,00</span>
+                    </button>
+                    <button class="tier-btn" onclick="selectTier('luah',30)">
+                        <span class="tier-pct">30%</span>
+                        <span class="tier-label">Agressivo</span>
+                        <span class="tier-val" id="luah-tier-30">R$ 0,00</span>
+                    </button>
+                </div>
+                <div class="invest-input-row">
+                    <label>Investido este mês (R$):</label>
+                    <input type="number" id="luah-investment" placeholder="0,00" step="0.01" oninput="updateChart('luah')">
+                    <button class="btn-primary" onclick="saveInvestment('luah')">Salvar</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">
+                    Distribuição dos gastos
+                    <div class="chart-toggle">
+                        <button class="toggle-btn active" id="luah-toggle-month" onclick="setChartMode('luah','month')">Este mês</button>
+                        <button class="toggle-btn" id="luah-toggle-all" onclick="setChartMode('luah','all')">Total geral</button>
+                    </div>
+                </div>
+                <div style="max-width:280px;margin:8px auto 0">
+                    <canvas id="luah-chart"></canvas>
+                    <div id="luah-chart-empty" class="chart-empty" style="display:none">Nenhum gasto registrado ainda</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOS -->
+        <div id="pane-nos" class="tab-pane">
+            <div class="month-row">
+                <label>Mês:</label>
+                <select id="nos-month" onchange="loadNos()"></select>
+            </div>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-label" id="nos-my-label">Minha renda</div>
+                    <div class="summary-value" id="nos-my-income">R$ 0,00</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label" id="nos-other-label">Contribuição</div>
+                    <div class="summary-value" id="nos-other-pct">0%</div>
+                </div>
+                <div class="summary-card dark">
+                    <div class="summary-label">Divisão</div>
+                    <div class="summary-value" id="nos-split-label" style="font-size:1rem">0% + 0%</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Contas da casa</div>
+                <p class="card-hint">Aparecem todo mês automaticamente — edite o valor mês a mês se precisar</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Conta</th>
+                            <th style="width:110px">Valor (R$)</th>
+                            <th style="width:90px;text-align:center">Gabriel</th>
+                            <th style="width:90px;text-align:center">Luah</th>
+                            <th style="width:60px;text-align:center">Pago?</th>
+                            <th style="width:40px"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="nos-fixed-tbody"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td>Total fixo</td>
+                            <td id="nos-fixed-total">R$ 0,00</td>
+                            <td colspan="4"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button class="btn-add" onclick="addNosFixedRow()">+ Adicionar conta da casa</button>
+            </div>
+            <div class="card">
+                <div class="card-title">Gastos extras do mês</div>
+                <p class="card-hint">Somente para este mês — registre quem pagou cada item</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th style="width:120px">Valor (R$)</th>
+                            <th style="width:120px">Quem pagou</th>
+                            <th style="width:40px"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="nos-extras-tbody"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td>Total extras</td>
+                            <td id="nos-extras-total">R$ 0,00</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button class="btn-add" onclick="addNosExtraRow()">+ Adicionar gasto extra</button>
+            </div>
+            <div class="card">
+                <div class="card-title">Acerto do mês</div>
+                <div class="balance-row">
+                    <span>Gabriel pagou</span>
+                    <strong id="nos-g-paid">R$ 0,00</strong>
+                </div>
+                <div class="balance-row">
+                    <span>Luah pagou</span>
+                    <strong id="nos-l-paid">R$ 0,00</strong>
+                </div>
+                <div class="balance-result" id="nos-balance-result">Nenhum gasto registrado</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Divisão proporcional</div>
+                <div style="text-align:center;font-size:0.82rem;color:#888;margin-bottom:14px">
+                    Total geral (fixas + extras): <strong id="nos-grand-total">R$ 0,00</strong>
+                </div>
+                <div class="division-grid">
+                    <div class="division-person">
+                        <div class="division-name">Gabriel</div>
+                        <div class="division-pct" id="g-pct">0%</div>
+                        <div class="division-amount" id="g-amount">R$ 0,00</div>
+                    </div>
+                    <div class="division-person">
+                        <div class="division-name">Luah</div>
+                        <div class="division-pct" id="l-pct">0%</div>
+                        <div class="division-amount" id="l-amount">R$ 0,00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyBrpUJtL9uaTTPuqc6pi1fL04W847s3a24",
+    authDomain: "finan-lgs2.firebaseapp.com",
+    projectId: "finan-lgs2",
+    storageBucket: "finan-lgs2.firebasestorage.app",
+    messagingSenderId: "180031694510",
+    appId: "1:180031694510:web:619bb5a96896cb4efb6f3f"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const COL = 'financas';
+
+const USER_NAMES = {
+    'gabrielvinicius964@gmail.com': 'Gabriel',
+    'luahsf@gmail.com': 'Luah'
+};
+
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const CATS = ['Alimentação','Transporte','Lazer','Saúde','Vestuário','Assinatura','Outros'];
+const PALETTE = ['#0f3460','#533483','#f5a623','#4a9d5a','#2196f3','#ff9800','#c62828','#9e9e9e'];
+
+let saveTimer = null;
+let currentUserEmail = null;
+let charts = {};
+let chartModes = { gabriel: 'month', luah: 'month' };
+
+// ---- AUTH ----
+
+auth.onAuthStateChanged(user => {
+    if (user) {
+        currentUserEmail = user.email;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'block';
+        const name = USER_NAMES[user.email] || user.email;
+        document.getElementById('user-name').textContent = name;
+
+        const isGabriel = user.email === 'gabrielvinicius964@gmail.com';
+        const isLuah = user.email === 'luahsf@gmail.com';
+
+        document.querySelectorAll('.tab')[0].style.display = isGabriel ? 'block' : 'none';
+        document.querySelectorAll('.tab')[1].style.display = isLuah ? 'block' : 'none';
+
+        document.getElementById('nos-other-label').textContent = isGabriel ? 'Contribuição da Luah' : 'Contribuição do Gabriel';
+
+        fillMonths('nos-month');
+
+        if (isGabriel) {
+            fillMonths('gabriel-month');
+            loadFixed('gabriel');
+            switchTab('gabriel');
+        } else if (isLuah) {
+            fillMonths('luah-month');
+            loadFixed('luah');
+            switchTab('luah');
+        }
+    } else {
+        currentUserEmail = null;
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('app-screen').style.display = 'none';
+    }
+});
+
+async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-password').value;
+    const btn = document.getElementById('btn-login');
+    const err = document.getElementById('login-error');
+    if (!email || !pass) { err.textContent = 'Preencha e-mail e senha.'; return; }
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+    err.textContent = '';
+    try {
+        await auth.signInWithEmailAndPassword(email, pass);
+    } catch(e) {
+        err.textContent = 'E-mail ou senha incorretos.';
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+    }
+}
+
+async function doLogout() { await auth.signOut(); }
+
+// ---- HELPERS ----
+
+function currentKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+function fmt(v) {
+    return 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function showStatus(msg, color = '#4caf50') {
+    const el = document.getElementById('status-msg');
+    el.style.color = color;
+    el.textContent = msg;
+    clearTimeout(showStatus._t);
+    if (msg) showStatus._t = setTimeout(() => el.textContent = '', 2500);
+}
+
+async function saveToDb(key, data) {
+    try {
+        showStatus('Salvando...', '#aaa');
+        await db.collection(COL).doc(key).set(data);
+        showStatus('Salvo!');
+    } catch(e) { showStatus('Erro ao salvar', '#e94560'); }
+}
+
+async function loadFromDb(key) {
+    try {
+        const doc = await db.collection(COL).doc(key).get();
+        return doc.exists ? doc.data() : {};
+    } catch(e) { showStatus('Erro ao carregar', '#e94560'); return {}; }
+}
+
+function fillMonths(id) {
+    const sel = document.getElementById(id);
+    const now = new Date();
+    sel.innerHTML = '';
+    for (let i = 5; i >= -2; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+        if (key === currentKey()) opt.selected = true;
+        sel.appendChild(opt);
+    }
+}
+
+function switchTab(name) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('pane-' + name).classList.add('active');
+    const idx = ['gabriel','luah','nos'].indexOf(name);
+    document.querySelectorAll('.tab')[idx].classList.add('active');
+    if (name === 'nos') loadNos();
+}
+
+// ---- CONTAS FIXAS ----
+
+function addFixedRow(who, name='', val='') {
+    const tbody = document.getElementById(who + '-fixed-tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input type="text" value="${name}" placeholder="Ex: Academia" oninput="debounceSaveFixed('${who}')"></td>
+        <td><input type="number" value="${val}" placeholder="0,00" step="0.01" oninput="debounceSaveFixed('${who}');calcFixedTotal('${who}')"></td>
+        <td><button class="btn-remove" onclick="this.closest('tr').remove();debounceSaveFixed('${who}');calcFixedTotal('${who}')">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+    calcFixedTotal(who);
+}
+
+function calcFixedTotal(who) {
+    let t = 0;
+    document.querySelectorAll(`#${who}-fixed-tbody tr`).forEach(tr => {
+        t += parseFloat(tr.querySelectorAll('input')[1]?.value) || 0;
+    });
+    document.getElementById(who + '-fixed-total').textContent = fmt(t);
+    updateChart(who);
+    calcSaldo(who);
+}
+
+function debounceSaveFixed(who) {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => saveFixed(who), 1000);
+}
+
+async function saveFixed(who) {
+    const prefix = who === 'gabriel' ? 'g' : 'l';
+    const bills = [];
+    document.querySelectorAll(`#${who}-fixed-tbody tr`).forEach(tr => {
+        const ins = tr.querySelectorAll('input');
+        bills.push({ name: ins[0].value, val: parseFloat(ins[1].value)||0 });
+    });
+    await saveToDb(prefix + '_fixed', { bills });
+}
+
+async function loadFixed(who) {
+    const prefix = who === 'gabriel' ? 'g' : 'l';
+    const d = await loadFromDb(prefix + '_fixed');
+    document.getElementById(who + '-fixed-tbody').innerHTML = '';
+    (d.bills || []).forEach(b => addFixedRow(who, b.name, b.val));
+    calcFixedTotal(who);
+}
+
+// ---- GASTOS DO MÊS ----
+
+function addRow(who, date='', cat='', desc='', val='') {
+    const tbody = document.getElementById(who + '-tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input type="date" value="${date}" onchange="debounceSaveExpenses('${who}')"></td>
+        <td><select onchange="debounceSaveExpenses('${who}')">${CATS.map(c=>`<option${c===cat?' selected':''}>${c}</option>`).join('')}</select></td>
+        <td><input type="text" value="${desc}" placeholder="Descrição" oninput="debounceSaveExpenses('${who}')"></td>
+        <td><input type="number" value="${val}" placeholder="0,00" step="0.01" oninput="debounceSaveExpenses('${who}');calcTotal('${who}')"></td>
+        <td><button class="btn-remove" onclick="this.closest('tr').remove();debounceSaveExpenses('${who}');calcTotal('${who}')">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+    calcTotal(who);
+}
+
+function calcTotal(who) {
+    let t = 0;
+    document.querySelectorAll(`#${who}-tbody tr`).forEach(tr => {
+        t += parseFloat(tr.querySelectorAll('input')[2]?.value) || 0;
+    });
+    document.getElementById(who + '-total').textContent = fmt(t);
+    updateChart(who);
+    calcSaldo(who);
+}
+
+function debounceSaveExpenses(who) {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => saveExpenses(who), 1000);
+}
+
+async function saveExpenses(who) {
+    const prefix = who === 'gabriel' ? 'g' : 'l';
+    const m = document.getElementById(who + '-month').value;
+    const d = await loadFromDb(prefix + '_' + m);
+    const expenses = [];
+    document.querySelectorAll(`#${who}-tbody tr`).forEach(tr => {
+        const ins = tr.querySelectorAll('input,select');
+        expenses.push({ date: ins[0].value, cat: ins[1].value, desc: ins[2].value, val: parseFloat(ins[3].value)||0 });
+    });
+    d.expenses = expenses;
+    await saveToDb(prefix + '_' + m, d);
+}
+
+async function loadGabriel() {
+    const m = document.getElementById('gabriel-month').value;
+    showStatus('Carregando...', '#aaa');
+    const d = await loadFromDb('g_' + m);
+    document.getElementById('gabriel-income').value = d.income || '';
+    document.getElementById('gabriel-investment').value = d.investment || '';
+    document.getElementById('gabriel-tbody').innerHTML = '';
+    (d.expenses || []).forEach(e => addRow('gabriel', e.date, e.cat, e.desc, e.val));
+    calcTotal('gabriel');
+    updateTierValues('gabriel');
+    await loadStats('gabriel');
+    showStatus('');
+}
+
+async function saveGabrielIncome() {
+    const m = document.getElementById('gabriel-month').value;
+    const d = await loadFromDb('g_' + m);
+    d.income = parseFloat(document.getElementById('gabriel-income').value) || 0;
+    await saveToDb('g_' + m, d);
+}
+
+async function saveLuahIncome() {
+    const m = document.getElementById('luah-month').value;
+    const d = await loadFromDb('l_' + m);
+    d.income = parseFloat(document.getElementById('luah-income').value) || 0;
+    await saveToDb('l_' + m, d);
+}
+
+async function loadLuah() {
+    const m = document.getElementById('luah-month').value;
+    showStatus('Carregando...', '#aaa');
+    const d = await loadFromDb('l_' + m);
+    document.getElementById('luah-income').value = d.income || '';
+    document.getElementById('luah-investment').value = d.investment || '';
+    document.getElementById('luah-tbody').innerHTML = '';
+
+    (d.expenses || []).forEach(e => addRow('luah', e.date, e.cat, e.desc, e.val));
+    calcTotal('luah');
+    updateTierValues('luah');
+    await loadStats('luah');
+    showStatus('');
+}
+
+// ---- INVESTIMENTOS ----
+
+const selectedTier = { gabriel: 20, luah: 20 };
+
+function updateTierValues(who) {
+    const income = parseFloat(document.getElementById(who + '-income').value) || 0;
+    [10, 20, 30].forEach(pct => {
+        const el = document.getElementById(who + '-tier-' + pct);
+        if (el) el.textContent = fmt(income * pct / 100);
+    });
+}
+
+function selectTier(who, pct) {
+    selectedTier[who] = pct;
+    const btns = document.querySelectorAll(`#${who}-tiers .tier-btn`);
+    btns.forEach(b => b.classList.remove('active'));
+    btns[[10,20,30].indexOf(pct)].classList.add('active');
+    const income = parseFloat(document.getElementById(who + '-income').value) || 0;
+    document.getElementById(who + '-investment').value = (income * pct / 100).toFixed(2);
+    updateChart(who);
+}
+
+async function saveInvestment(who) {
+    const prefix = who === 'gabriel' ? 'g' : 'l';
+    const m = document.getElementById(who + '-month').value;
+    const d = await loadFromDb(prefix + '_' + m);
+    d.investment = parseFloat(document.getElementById(who + '-investment').value) || 0;
+    await saveToDb(prefix + '_' + m, d);
+    updateChart(who);
+}
+
+// ---- STATS ----
+
+async function loadStats(who) {
+    const prefix = who === 'gabriel' ? 'g' : 'l';
+    const currentMonth = document.getElementById(who + '-month').value;
+    const [year, month] = currentMonth.split('-').map(Number);
+    const prevDate = new Date(year, month - 2, 1);
+    const prevKey = `${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,'0')}`;
+
+    const prevData = await loadFromDb(prefix + '_' + prevKey);
+    const prevIncome = prevData.income || 0;
+    const currentIncome = parseFloat(document.getElementById(who + '-income').value) || 0;
+
+    document.getElementById(who + '-stat-prev').textContent = prevIncome > 0 ? fmt(prevIncome) : 'Sem registro';
+
+    const diffEl = document.getElementById(who + '-stat-prev-diff');
+    if (prevIncome > 0 && currentIncome > 0) {
+        const diff = ((currentIncome - prevIncome) / prevIncome * 100).toFixed(1);
+        diffEl.textContent = `${diff >= 0 ? '▲' : '▼'} ${Math.abs(diff)}% vs atual`;
+        diffEl.style.color = diff >= 0 ? '#4a9d5a' : '#e94560';
+    } else {
+        diffEl.textContent = '';
+    }
+
+    const snap = await db.collection(COL).get();
+    let totalIncome = 0, incomeCount = 0, totalInvested = 0;
+    snap.forEach(doc => {
+        if (doc.id.startsWith(prefix + '_') && doc.id !== prefix + '_fixed') {
+            const d = doc.data();
+            if (d.income > 0) { totalIncome += d.income; incomeCount++; }
+            totalInvested += d.investment || 0;
+        }
+    });
+
+    document.getElementById(who + '-stat-avg').textContent = incomeCount > 0 ? fmt(totalIncome / incomeCount) : 'Sem registro';
+    document.getElementById(who + '-stat-invested').textContent = fmt(totalInvested);
+
+    calcSaldo(who);
+}
+
+function calcSaldo(who) {
+    const income = parseFloat(document.getElementById(who + '-income').value) || 0;
+    let fixed = 0;
+    document.querySelectorAll(`#${who}-fixed-tbody tr`).forEach(tr => {
+        fixed += parseFloat(tr.querySelectorAll('input')[1]?.value) || 0;
+    });
+    let expenses = 0;
+    document.querySelectorAll(`#${who}-tbody tr`).forEach(tr => {
+        expenses += parseFloat(tr.querySelectorAll('input')[2]?.value) || 0;
+    });
+    const investment = parseFloat(document.getElementById(who + '-investment').value) || 0;
+    const saldo = income - fixed - expenses - investment;
+
+    const el = document.getElementById(who + '-stat-saldo');
+    const labelEl = document.getElementById(who + '-stat-saldo-label');
+    el.textContent = fmt(Math.abs(saldo));
+    el.style.color = saldo >= 0 ? '#4a9d5a' : '#e94560';
+    labelEl.textContent = saldo >= 0 ? 'Saldo livre' : 'Saldo negativo';
+}
+
+// ---- GRÁFICO ----
+
+function setChartMode(who, mode) {
+    chartModes[who] = mode;
+    document.getElementById(who + '-toggle-month').classList.toggle('active', mode === 'month');
+    document.getElementById(who + '-toggle-all').classList.toggle('active', mode === 'all');
+    updateChart(who);
+}
+
+async function updateChart(who) {
+    const prefix = who === 'gabriel' ? 'g' : 'l';
+    const mode = chartModes[who];
+
+    // Contas fixas
+    let fixedTotal = 0;
+    document.querySelectorAll(`#${who}-fixed-tbody tr`).forEach(tr => {
+        fixedTotal += parseFloat(tr.querySelectorAll('input')[1]?.value) || 0;
+    });
+
+    // Gastos por categoria
+    const catTotals = {};
+    CATS.forEach(c => catTotals[c] = 0);
+
+    if (mode === 'month') {
+        document.querySelectorAll(`#${who}-tbody tr`).forEach(tr => {
+            const ins = tr.querySelectorAll('input,select');
+            const cat = ins[1].value;
+            const val = parseFloat(ins[3].value) || 0;
+            if (cat) catTotals[cat] = (catTotals[cat] || 0) + val;
+        });
+    } else {
+        // Todos os meses do Firestore
+        const snap = await db.collection(COL).get();
+        snap.forEach(doc => {
+            if (doc.id.startsWith(prefix + '_') && doc.id !== prefix + '_fixed') {
+                (doc.data().expenses || []).forEach(e => {
+                    if (e.cat) catTotals[e.cat] = (catTotals[e.cat] || 0) + (e.val || 0);
+                });
+            }
+        });
+    }
+
+    // Investimento
+    let investment = 0;
+    if (mode === 'month') {
+        investment = parseFloat(document.getElementById(who + '-investment').value) || 0;
+    } else {
+        const snap2 = await db.collection(COL).get();
+        snap2.forEach(doc => {
+            if (doc.id.startsWith(prefix + '_') && doc.id !== prefix + '_fixed') {
+                investment += doc.data().investment || 0;
+            }
+        });
+    }
+
+    const labels = [];
+    const values = [];
+    const colors = [];
+
+    if (investment > 0) { labels.push('Investido'); values.push(investment); colors.push('#4a9d5a'); }
+    if (fixedTotal > 0) { labels.push('Contas Fixas'); values.push(fixedTotal); colors.push('#e94560'); }
+    CATS.forEach((cat, i) => {
+        if (catTotals[cat] > 0) { labels.push(cat); values.push(catTotals[cat]); colors.push(PALETTE[i % PALETTE.length]); }
+    });
+
+    const canvas = document.getElementById(who + '-chart');
+    const empty = document.getElementById(who + '-chart-empty');
+
+    if (values.length === 0) {
+        canvas.style.display = 'none';
+        empty.style.display = 'block';
+        if (charts[who]) { charts[who].destroy(); delete charts[who]; }
+        return;
+    }
+
+    canvas.style.display = 'block';
+    empty.style.display = 'none';
+
+    if (charts[who]) charts[who].destroy();
+
+    charts[who] = new Chart(canvas.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [{ data: values, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 14, boxWidth: 12 } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const total = ctx.dataset.data.reduce((a,b) => a+b, 0);
+                            const pct = (ctx.parsed / total * 100).toFixed(1);
+                            return ` ${fmt(ctx.parsed)} (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ---- NOS ----
+
+let nosFixedTimer = null;
+let nosMonthTimer = null;
+let nosPropG = 0.5;
+let nosPropL = 0.5;
+
+function addNosFixedRow(name='', val='', paid=false) {
+    const tbody = document.getElementById('nos-fixed-tbody');
+    const tr = document.createElement('tr');
+    const v = parseFloat(val) || 0;
+    tr.innerHTML = `
+        <td><input type="text" value="${name}" placeholder="Ex: Aluguel" oninput="debounceSaveNosFixed()"></td>
+        <td><input type="number" value="${val}" placeholder="0,00" step="0.01" oninput="debounceSaveNosMonth();calcNosTotal()"></td>
+        <td class="split-cell" id="">${fmt(v * nosPropG)}</td>
+        <td class="split-cell">${fmt(v * nosPropL)}</td>
+        <td style="text-align:center"><input type="checkbox" ${paid?'checked':''} onchange="debounceSaveNosMonth()"></td>
+        <td><button class="btn-remove" onclick="this.closest('tr').remove();debounceSaveNosFixed();calcNosTotal()">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+    calcNosTotal();
+}
+
+function updateFixedSplits() {
+    document.querySelectorAll('#nos-fixed-tbody tr').forEach(tr => {
+        const val = parseFloat(tr.querySelectorAll('input')[1]?.value) || 0;
+        const cells = tr.querySelectorAll('.split-cell');
+        if (cells[0]) cells[0].textContent = fmt(val * nosPropG);
+        if (cells[1]) cells[1].textContent = fmt(val * nosPropL);
+    });
+}
+
+function addNosExtraRow(name='', val='', paidBy='') {
+    const tbody = document.getElementById('nos-extras-tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input type="text" value="${name}" placeholder="Ex: Jantar" oninput="debounceSaveNosMonth()"></td>
+        <td><input type="number" value="${val}" placeholder="0,00" step="0.01" oninput="debounceSaveNosMonth();calcNosTotal()"></td>
+        <td><select onchange="debounceSaveNosMonth();calcExtrasBalance()">
+            <option value="">—</option>
+            <option value="gabriel" ${paidBy==='gabriel'?'selected':''}>Gabriel</option>
+            <option value="luah" ${paidBy==='luah'?'selected':''}>Luah</option>
+        </select></td>
+        <td><button class="btn-remove" onclick="this.closest('tr').remove();debounceSaveNosMonth();calcNosTotal()">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+    calcNosTotal();
+}
+
+function calcExtrasBalance() {
+    let gPaid = 0, lPaid = 0;
+    document.querySelectorAll('#nos-extras-tbody tr').forEach(tr => {
+        const val = parseFloat(tr.querySelectorAll('input')[1]?.value) || 0;
+        const who = tr.querySelector('select')?.value;
+        if (who === 'gabriel') gPaid += val;
+        else if (who === 'luah') lPaid += val;
+    });
+    document.getElementById('nos-g-paid').textContent = fmt(gPaid);
+    document.getElementById('nos-l-paid').textContent = fmt(lPaid);
+
+    // Divisão 50/50: saldo = (quem pagou mais - quem pagou menos) / 2
+    const balance = (gPaid - lPaid) / 2;
+    const el = document.getElementById('nos-balance-result');
+
+    if (gPaid === 0 && lPaid === 0) {
+        el.textContent = 'Nenhum gasto registrado';
+        el.style.color = '#aaa';
+        el.style.background = '';
+    } else if (Math.abs(balance) < 0.01) {
+        el.textContent = 'Em dia! ✓';
+        el.style.color = '#4a9d5a';
+        el.style.background = '#f0faf0';
+    } else if (balance > 0) {
+        el.textContent = `Luah deve ${fmt(balance)} para Gabriel`;
+        el.style.color = '#e94560';
+        el.style.background = '#fff5f7';
+    } else {
+        el.textContent = `Gabriel deve ${fmt(-balance)} para Luah`;
+        el.style.color = '#e94560';
+        el.style.background = '#fff5f7';
+    }
+}
+
+function calcNosTotal() {
+    let fixed = 0;
+    document.querySelectorAll('#nos-fixed-tbody tr').forEach(tr => {
+        fixed += parseFloat(tr.querySelectorAll('input')[1]?.value) || 0;
+    });
+    let extras = 0;
+    document.querySelectorAll('#nos-extras-tbody tr').forEach(tr => {
+        extras += parseFloat(tr.querySelectorAll('input')[1]?.value) || 0;
+    });
+    document.getElementById('nos-fixed-total').textContent = fmt(fixed);
+    document.getElementById('nos-extras-total').textContent = fmt(extras);
+    document.getElementById('nos-grand-total').textContent = fmt(fixed + extras);
+    updateDivision(fixed + extras);
+    calcExtrasBalance();
+}
+
+function debounceSaveNosFixed() {
+    clearTimeout(nosFixedTimer);
+    nosFixedTimer = setTimeout(saveNosFixed, 1000);
+    debounceSaveNosMonth();
+}
+
+function debounceSaveNosMonth() {
+    clearTimeout(nosMonthTimer);
+    nosMonthTimer = setTimeout(saveNosMonth, 1000);
+}
+
+async function saveNosFixed() {
+    const bills = [];
+    document.querySelectorAll('#nos-fixed-tbody tr').forEach(tr => {
+        const ins = tr.querySelectorAll('input');
+        bills.push({ name: ins[0].value, defaultVal: parseFloat(ins[1].value)||0 });
+    });
+    await saveToDb('nos_fixed', { bills });
+}
+
+async function saveNosMonth() {
+    const m = document.getElementById('nos-month').value;
+    const billVals = {};
+    document.querySelectorAll('#nos-fixed-tbody tr').forEach(tr => {
+        const ins = tr.querySelectorAll('input');
+        const name = ins[0].value;
+        if (name) billVals[name] = { val: parseFloat(ins[1].value)||0, paid: ins[2].checked };
+    });
+    const extras = [];
+    document.querySelectorAll('#nos-extras-tbody tr').forEach(tr => {
+        const ins = tr.querySelectorAll('input');
+        const sel = tr.querySelector('select');
+        extras.push({ name: ins[0].value, val: parseFloat(ins[1].value)||0, paidBy: sel?.value || '' });
+    });
+    await saveToDb('nos_' + m, { billVals, extras });
+}
+
+async function calcNos() {
+    const m = document.getElementById('nos-month').value;
+    const gd = await loadFromDb('g_' + m);
+    const ld = await loadFromDb('l_' + m);
+    const gi = gd.income || 0;
+    const li = ld.income || 0;
+    const ti = gi + li;
+
+    const isGabriel = currentUserEmail === 'gabrielvinicius964@gmail.com';
+    const myIncome = isGabriel ? gi : li;
+    const otherIncome = isGabriel ? li : gi;
+    const otherPct = ti > 0 ? (otherIncome / ti * 100).toFixed(1) + '%' : '0%';
+
+    document.getElementById('nos-my-income').textContent = fmt(myIncome);
+    document.getElementById('nos-other-pct').textContent = otherPct;
+
+    if (ti > 0) {
+        nosPropG = gi / ti;
+        nosPropL = li / ti;
+        const gPct = (gi/ti*100).toFixed(1);
+        const lPct = (li/ti*100).toFixed(1);
+        document.getElementById('nos-split-label').textContent = `Gabriel ${gPct}% + Luah ${lPct}%`;
+    } else {
+        nosPropG = 0.5;
+        nosPropL = 0.5;
+        document.getElementById('nos-split-label').textContent = '0% + 0%';
+    }
+
+    updateFixedSplits();
+    calcNosTotal();
+}
+
+function updateDivision(tb) {
+    const m = document.getElementById('nos-month').value;
+    loadFromDb('g_' + m).then(gd => {
+        loadFromDb('l_' + m).then(ld => {
+            const gi = gd.income || 0;
+            const li = ld.income || 0;
+            const ti = gi + li;
+            if (ti > 0) {
+                nosPropG = gi / ti;
+                nosPropL = li / ti;
+                document.getElementById('g-pct').textContent = (gi/ti*100).toFixed(1) + '%';
+                document.getElementById('l-pct').textContent = (li/ti*100).toFixed(1) + '%';
+                document.getElementById('g-amount').textContent = fmt(tb*(gi/ti));
+                document.getElementById('l-amount').textContent = fmt(tb*(li/ti));
+            } else {
+                nosPropG = 0.5; nosPropL = 0.5;
+                ['g-pct','l-pct'].forEach(id => document.getElementById(id).textContent = '0%');
+                ['g-amount','l-amount'].forEach(id => document.getElementById(id).textContent = fmt(0));
+            }
+            updateFixedSplits();
+        });
+    });
+}
+
+async function loadNos() {
+    const m = document.getElementById('nos-month').value;
+    showStatus('Carregando...', '#aaa');
+
+    const fixedData = await loadFromDb('nos_fixed');
+    const monthData = await loadFromDb('nos_' + m);
+
+    document.getElementById('nos-fixed-tbody').innerHTML = '';
+    (fixedData.bills || []).forEach(b => {
+        const override = monthData.billVals?.[b.name];
+        const val = override !== undefined ? override.val : b.defaultVal;
+        const paid = override?.paid || false;
+        addNosFixedRow(b.name, val, paid);
+    });
+
+    document.getElementById('nos-extras-tbody').innerHTML = '';
+    (monthData.extras || []).forEach(e => addNosExtraRow(e.name, e.val, e.paidBy || ''));
+
+    await calcNos();
+    showStatus('');
+}
+
+// ---- TEMA ----
+
+function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('btn-theme').textContent = isDark ? '☀️' : '🌙';
+    localStorage.setItem('financas-theme', isDark ? 'dark' : 'light');
+}
+
+(function initTheme() {
+    if (localStorage.getItem('financas-theme') === 'dark') {
+        document.body.classList.add('dark');
+        const btn = document.getElementById('btn-theme');
+        if (btn) btn.textContent = '☀️';
+    }
+})();
+</script>
+</body>
+</html>
