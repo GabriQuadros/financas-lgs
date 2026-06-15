@@ -752,7 +752,6 @@
                         <div class="division-amount" id="l-amount">R$ 0,00</div>
                     </div>
                 </div>
-                <p id="nos-division-explain" class="division-explain"></p>
             </div>
         </div>
 
@@ -1164,19 +1163,28 @@ async function loadStats(who) {
 
 function calcSaldo(who) {
     const income = parseFloat(document.getElementById(who + '-income').value) || 0;
+    const el = document.getElementById(who + '-stat-saldo');
+    const labelEl = document.getElementById(who + '-stat-saldo-label');
+
+    if (income === 0) {
+        el.textContent = '—';
+        el.style.color = '#bbb';
+        labelEl.textContent = 'Saldo livre';
+        updateAnalysis(who);
+        return;
+    }
+
     let fixed = 0;
     document.querySelectorAll(`#${who}-fixed-tbody tr`).forEach(tr => {
         fixed += parseFloat(tr.querySelectorAll('input')[1]?.value) || 0;
     });
     let expenses = 0;
     document.querySelectorAll(`#${who}-tbody tr`).forEach(tr => {
-        expenses += parseFloat(tr.querySelectorAll('input')[2]?.value) || 0;
+        expenses += parseFloat(tr.querySelectorAll('input')[3]?.value) || 0;
     });
     const investment = parseFloat(document.getElementById(who + '-investment').value) || 0;
     const saldo = income - fixed - expenses - investment;
 
-    const el = document.getElementById(who + '-stat-saldo');
-    const labelEl = document.getElementById(who + '-stat-saldo-label');
     el.textContent = fmt(Math.abs(saldo));
     el.style.color = saldo >= 0 ? '#4a9d5a' : '#e94560';
     labelEl.textContent = saldo >= 0 ? 'Saldo livre' : 'Saldo negativo';
@@ -1474,16 +1482,10 @@ function updateDivision(tb) {
                 document.getElementById('l-pct').textContent = (li/ti*100).toFixed(1) + '%';
                 document.getElementById('g-amount').textContent = fmt(tb*(gi/ti));
                 document.getElementById('l-amount').textContent = fmt(tb*(li/ti));
-                const explainEl = document.getElementById('nos-division-explain');
-                if (explainEl && tb > 0) {
-                    explainEl.textContent = `Gabriel recebe ${fmt(gi)} (${(gi/ti*100).toFixed(1)}% da renda total) e Luah recebe ${fmt(li)} (${(li/ti*100).toFixed(1)}%). Por isso, do total de ${fmt(tb)} em contas: Gabriel paga ${fmt(tb*gi/ti)} e Luah paga ${fmt(tb*li/ti)}.`;
-                } else if (explainEl) { explainEl.textContent = ''; }
             } else {
                 nosPropG = 0.5; nosPropL = 0.5;
                 ['g-pct','l-pct'].forEach(id => document.getElementById(id).textContent = '0%');
                 ['g-amount','l-amount'].forEach(id => document.getElementById(id).textContent = fmt(0));
-                const explainEl = document.getElementById('nos-division-explain');
-                if (explainEl) explainEl.textContent = '';
             }
             updateFixedSplits();
         });
