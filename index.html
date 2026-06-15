@@ -166,6 +166,9 @@
             tbody td select { font-size: 0.78rem; padding: 4px 6px; }
             tfoot td { padding: 8px 6px; font-size: 0.82rem; }
 
+            /* Sticky stats mobile */
+            .stats-sticky { top: 76px; margin: 0 -14px; padding: 0 14px 6px; }
+
             /* Mês selector */
             .month-row { flex-wrap: wrap; }
 
@@ -308,6 +311,39 @@
         .invest-input-row { display: flex; align-items: center; gap: 10px; }
         .invest-input-row label { font-size: 0.88rem; color: #666; white-space: nowrap; }
         .invest-input-row input { padding: 7px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; width: 160px; }
+
+        /* STICKY STATS */
+        .stats-sticky {
+            position: sticky;
+            top: 96px;
+            z-index: 10;
+            background: #f0f2f5;
+            margin: 0 -28px;
+            padding: 0 28px 6px;
+        }
+        body.dark .stats-sticky { background: #0d0d1a; }
+
+        /* INSTALLMENT BADGE */
+        .parcela-badge { display: inline-block; font-size: 0.68rem; background: #e3f2fd; color: #1565c0; padding: 1px 5px; border-radius: 3px; margin-top: 2px; }
+        body.dark .parcela-badge { background: #0a1929; color: #90caf9; }
+
+        /* ANALYSIS */
+        .analysis-item { padding: 9px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.86rem; color: #444; }
+        .analysis-item:last-child { border-bottom: none; }
+        .analysis-tip { color: #888; font-size: 0.8rem; margin-top: 3px; }
+        body.dark .analysis-item { border-bottom-color: #1e1e38; color: #bbb; }
+        body.dark .analysis-tip { color: #555; }
+
+        /* NOS SHARE */
+        .nos-share-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #f5f5f5; font-size: 0.86rem; }
+        .nos-share-row:last-of-type { border-bottom: none; }
+        .nos-share-total { display: flex; justify-content: space-between; font-weight: 700; padding-top: 10px; margin-top: 10px; border-top: 2px solid #eee; font-size: 0.92rem; }
+        body.dark .nos-share-row { border-bottom-color: #181830; }
+        body.dark .nos-share-total { border-top-color: #1e1e38; }
+
+        /* DIVISION EXPLANATION */
+        .division-explain { font-size: 0.8rem; color: #888; text-align: center; margin-top: 12px; line-height: 1.55; padding: 0 8px; }
+        body.dark .division-explain { color: #555; }
     </style>
 </head>
 <body>
@@ -356,6 +392,7 @@
                 <label>Mês:</label>
                 <select id="gabriel-month" onchange="loadGabriel()"></select>
             </div>
+            <div class="stats-sticky">
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-label">Mês anterior</div>
@@ -377,6 +414,7 @@
                     <div class="stat-value" id="gabriel-stat-saldo">R$ 0,00</div>
                     <div class="stat-sub">este mês</div>
                 </div>
+            </div>
             </div>
             <div class="card">
                 <div class="card-title">Renda do mês</div>
@@ -413,17 +451,18 @@
                 <div class="table-scroll"><table>
                     <thead>
                         <tr>
-                            <th style="width:120px">Data</th>
-                            <th style="width:145px">Categoria</th>
+                            <th style="width:110px">Data</th>
+                            <th style="width:135px">Categoria</th>
                             <th>Descrição</th>
-                            <th style="width:120px">Valor (R$)</th>
+                            <th style="width:60px;text-align:center">Parc.</th>
+                            <th style="width:110px">Valor (R$)</th>
                             <th style="width:40px"></th>
                         </tr>
                     </thead>
                     <tbody id="gabriel-tbody"></tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="3">Total</td>
+                            <td colspan="4">Total</td>
                             <td id="gabriel-total">R$ 0,00</td>
                             <td></td>
                         </tr>
@@ -470,6 +509,15 @@
                     <div id="gabriel-chart-empty" class="chart-empty" style="display:none">Nenhum gasto registrado ainda</div>
                 </div>
             </div>
+            <div class="card">
+                <div class="card-title">Sua parte nas contas da casa</div>
+                <p class="card-hint">Calculado com base na divisão proporcional da renda</p>
+                <div id="gabriel-nos-share"><p style="color:#aaa;font-size:0.85rem">Carregando...</p></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Análise dos gastos</div>
+                <div id="gabriel-analysis"><p style="color:#aaa;font-size:0.85rem">Adicione sua renda para ver a análise.</p></div>
+            </div>
         </div>
 
         <!-- LUAH -->
@@ -478,6 +526,7 @@
                 <label>Mês:</label>
                 <select id="luah-month" onchange="loadLuah()"></select>
             </div>
+            <div class="stats-sticky">
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-label">Mês anterior</div>
@@ -499,6 +548,7 @@
                     <div class="stat-value" id="luah-stat-saldo">R$ 0,00</div>
                     <div class="stat-sub">este mês</div>
                 </div>
+            </div>
             </div>
             <div class="card">
                 <div class="card-title">Renda do mês</div>
@@ -535,17 +585,18 @@
                 <div class="table-scroll"><table>
                     <thead>
                         <tr>
-                            <th style="width:120px">Data</th>
-                            <th style="width:145px">Categoria</th>
+                            <th style="width:110px">Data</th>
+                            <th style="width:135px">Categoria</th>
                             <th>Descrição</th>
-                            <th style="width:120px">Valor (R$)</th>
+                            <th style="width:60px;text-align:center">Parc.</th>
+                            <th style="width:110px">Valor (R$)</th>
                             <th style="width:40px"></th>
                         </tr>
                     </thead>
                     <tbody id="luah-tbody"></tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="3">Total</td>
+                            <td colspan="4">Total</td>
                             <td id="luah-total">R$ 0,00</td>
                             <td></td>
                         </tr>
@@ -591,6 +642,15 @@
                     <canvas id="luah-chart"></canvas>
                     <div id="luah-chart-empty" class="chart-empty" style="display:none">Nenhum gasto registrado ainda</div>
                 </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Sua parte nas contas da casa</div>
+                <p class="card-hint">Calculado com base na divisão proporcional da renda</p>
+                <div id="luah-nos-share"><p style="color:#aaa;font-size:0.85rem">Carregando...</p></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Análise dos gastos</div>
+                <div id="luah-analysis"><p style="color:#aaa;font-size:0.85rem">Adicione sua renda para ver a análise.</p></div>
             </div>
         </div>
 
@@ -641,13 +701,14 @@
             </div>
             <div class="card">
                 <div class="card-title">Gastos extras do mês</div>
-                <p class="card-hint">Somente para este mês — registre quem pagou cada item</p>
+                <p class="card-hint">Somente para este mês — marque "Dividir?" para incluir no acerto 50/50</p>
                 <div class="table-scroll"><table>
                     <thead>
                         <tr>
                             <th>Descrição</th>
-                            <th style="width:120px">Valor (R$)</th>
-                            <th style="width:120px">Quem pagou</th>
+                            <th style="width:110px">Valor (R$)</th>
+                            <th style="width:110px">Quem pagou</th>
+                            <th style="width:65px;text-align:center">Dividir?</th>
                             <th style="width:40px"></th>
                         </tr>
                     </thead>
@@ -656,7 +717,7 @@
                         <tr>
                             <td>Total extras</td>
                             <td id="nos-extras-total">R$ 0,00</td>
-                            <td colspan="2"></td>
+                            <td colspan="3"></td>
                         </tr>
                     </tfoot>
                 </table></div>
@@ -691,6 +752,7 @@
                         <div class="division-amount" id="l-amount">R$ 0,00</div>
                     </div>
                 </div>
+                <p id="nos-division-explain" class="division-explain"></p>
             </div>
         </div>
 
@@ -725,7 +787,7 @@ const USER_NAMES = {
 };
 
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const CATS = ['Alimentação','Transporte','Lazer','Saúde','Vestuário','Assinatura','Outros'];
+const CATS = ['Alimentação','Comidinhas','Comprinhas','Mercado','Transporte','Lazer','Saúde','Vestuário','Assinatura','Outros'];
 const PALETTE = ['#0f3460','#533483','#f5a623','#4a9d5a','#2196f3','#ff9800','#c62828','#9e9e9e'];
 
 let saveTimer = null;
@@ -896,13 +958,43 @@ async function loadFixed(who) {
 
 // ---- GASTOS DO MÊS ----
 
-function addRow(who, date='', cat='', desc='', val='') {
+function addMonthsToKey(key, n) {
+    const [y, m] = key.split('-').map(Number);
+    const d = new Date(y, m - 1 + n, 1);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+function getExpenseFromRow(tr) {
+    const ins = tr.querySelectorAll('input,select');
+    return {
+        date: ins[0]?.value || '',
+        cat: ins[1]?.value || '',
+        desc: ins[2]?.value || '',
+        parcelas: parseInt(ins[3]?.value) || 1,
+        val: parseFloat(ins[4]?.value) || 0,
+        parcelaAtual: parseInt(tr.dataset.parcelaAtual) || 1,
+        parcelaId: tr.dataset.parcelaId || ''
+    };
+}
+
+function addRow(who, date='', cat='', desc='', val='', parcelas=1, parcelaAtual=1, parcelaId='') {
     const tbody = document.getElementById(who + '-tbody');
     const tr = document.createElement('tr');
+    const isFollowup = parcelaAtual > 1;
+    const pid = parcelaId || (parcelas > 1 && !isFollowup ? `p${Date.now()}${Math.floor(Math.random()*9999)}` : '');
+    tr.dataset.parcelaAtual = parcelaAtual;
+    tr.dataset.parcelaId = pid;
+    const parcelasCell = isFollowup
+        ? `<td><input type="number" value="${parcelas}" style="width:50px;text-align:center;opacity:0.5" disabled></td>`
+        : `<td><input type="number" value="${parcelas || 1}" min="1" max="12" style="width:50px;text-align:center" oninput="debounceSaveExpenses('${who}')"></td>`;
     tr.innerHTML = `
         <td><input type="date" value="${date}" onchange="debounceSaveExpenses('${who}')"></td>
         <td><select onchange="debounceSaveExpenses('${who}')">${CATS.map(c=>`<option${c===cat?' selected':''}>${c}</option>`).join('')}</select></td>
-        <td><input type="text" value="${desc}" placeholder="Descrição" oninput="debounceSaveExpenses('${who}')"></td>
+        <td>
+            <input type="text" value="${desc}" placeholder="Descrição" oninput="debounceSaveExpenses('${who}')">
+            ${isFollowup ? `<div class="parcela-badge">Parcela ${parcelaAtual}/${parcelas}</div>` : ''}
+        </td>
+        ${parcelasCell}
         <td><input type="number" value="${val}" placeholder="0,00" step="0.01" oninput="debounceSaveExpenses('${who}');calcTotal('${who}')"></td>
         <td><button class="btn-remove" onclick="this.closest('tr').remove();debounceSaveExpenses('${who}');calcTotal('${who}')">✕</button></td>
     `;
@@ -913,7 +1005,7 @@ function addRow(who, date='', cat='', desc='', val='') {
 function calcTotal(who) {
     let t = 0;
     document.querySelectorAll(`#${who}-tbody tr`).forEach(tr => {
-        t += parseFloat(tr.querySelectorAll('input')[2]?.value) || 0;
+        t += parseFloat(tr.querySelectorAll('input')[3]?.value) || 0;
     });
     document.getElementById(who + '-total').textContent = fmt(t);
     updateChart(who);
@@ -931,11 +1023,26 @@ async function saveExpenses(who) {
     const d = await loadFromDb(prefix + '_' + m);
     const expenses = [];
     document.querySelectorAll(`#${who}-tbody tr`).forEach(tr => {
-        const ins = tr.querySelectorAll('input,select');
-        expenses.push({ date: ins[0].value, cat: ins[1].value, desc: ins[2].value, val: parseFloat(ins[3].value)||0 });
+        expenses.push(getExpenseFromRow(tr));
     });
     d.expenses = expenses;
     await saveToDb(prefix + '_' + m, d);
+    await propagateInstallments(prefix, m, expenses);
+}
+
+async function propagateInstallments(prefix, currentMonth, expenses) {
+    const originals = expenses.filter(e => e.parcelas > 1 && e.parcelaAtual === 1 && e.parcelaId);
+    for (const exp of originals) {
+        for (let p = 2; p <= exp.parcelas; p++) {
+            const futureMonth = addMonthsToKey(currentMonth, p - 1);
+            const futureKey = prefix + '_' + futureMonth;
+            const futureData = await loadFromDb(futureKey);
+            const existing = (futureData.expenses || []).filter(e => e.parcelaId !== exp.parcelaId);
+            existing.push({ date: exp.date, cat: exp.cat, desc: exp.desc, val: exp.val, parcelas: exp.parcelas, parcelaAtual: p, parcelaId: exp.parcelaId });
+            futureData.expenses = existing;
+            await saveToDb(futureKey, futureData);
+        }
+    }
 }
 
 async function loadGabriel() {
@@ -945,10 +1052,11 @@ async function loadGabriel() {
     document.getElementById('gabriel-income').value = d.income || '';
     document.getElementById('gabriel-investment').value = d.investment || '';
     document.getElementById('gabriel-tbody').innerHTML = '';
-    (d.expenses || []).forEach(e => addRow('gabriel', e.date, e.cat, e.desc, e.val));
+    (d.expenses || []).forEach(e => addRow('gabriel', e.date, e.cat, e.desc, e.val, e.parcelas||1, e.parcelaAtual||1, e.parcelaId||''));
     calcTotal('gabriel');
     updateTierValues('gabriel');
     await loadStats('gabriel');
+    await loadNosShare('gabriel');
     showStatus('');
 }
 
@@ -974,10 +1082,11 @@ async function loadLuah() {
     document.getElementById('luah-investment').value = d.investment || '';
     document.getElementById('luah-tbody').innerHTML = '';
 
-    (d.expenses || []).forEach(e => addRow('luah', e.date, e.cat, e.desc, e.val));
+    (d.expenses || []).forEach(e => addRow('luah', e.date, e.cat, e.desc, e.val, e.parcelas||1, e.parcelaAtual||1, e.parcelaId||''));
     calcTotal('luah');
     updateTierValues('luah');
     await loadStats('luah');
+    await loadNosShare('luah');
     showStatus('');
 }
 
@@ -1048,6 +1157,7 @@ async function loadStats(who) {
 
     document.getElementById(who + '-stat-avg').textContent = incomeCount > 0 ? fmt(totalIncome / incomeCount) : 'Sem registro';
     document.getElementById(who + '-stat-invested').textContent = fmt(totalInvested);
+    updateInvestRecommendation(who, totalInvested);
 
     calcSaldo(who);
 }
@@ -1070,6 +1180,7 @@ function calcSaldo(who) {
     el.textContent = fmt(Math.abs(saldo));
     el.style.color = saldo >= 0 ? '#4a9d5a' : '#e94560';
     labelEl.textContent = saldo >= 0 ? 'Saldo livre' : 'Saldo negativo';
+    updateAnalysis(who);
 }
 
 // ---- GRÁFICO ----
@@ -1099,7 +1210,7 @@ async function updateChart(who) {
         document.querySelectorAll(`#${who}-tbody tr`).forEach(tr => {
             const ins = tr.querySelectorAll('input,select');
             const cat = ins[1].value;
-            const val = parseFloat(ins[3].value) || 0;
+            const val = parseFloat(ins[4]?.value) || 0;
             if (cat) catTotals[cat] = (catTotals[cat] || 0) + val;
         });
     } else {
@@ -1208,7 +1319,7 @@ function updateFixedSplits() {
     });
 }
 
-function addNosExtraRow(name='', val='', paidBy='') {
+function addNosExtraRow(name='', val='', paidBy='', split=true) {
     const tbody = document.getElementById('nos-extras-tbody');
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -1219,6 +1330,7 @@ function addNosExtraRow(name='', val='', paidBy='') {
             <option value="gabriel" ${paidBy==='gabriel'?'selected':''}>Gabriel</option>
             <option value="luah" ${paidBy==='luah'?'selected':''}>Luah</option>
         </select></td>
+        <td style="text-align:center"><input type="checkbox" ${split?'checked':''} onchange="debounceSaveNosMonth();calcExtrasBalance()" title="Incluir no acerto 50/50"></td>
         <td><button class="btn-remove" onclick="this.closest('tr').remove();debounceSaveNosMonth();calcNosTotal()">✕</button></td>
     `;
     tbody.appendChild(tr);
@@ -1228,10 +1340,14 @@ function addNosExtraRow(name='', val='', paidBy='') {
 function calcExtrasBalance() {
     let gPaid = 0, lPaid = 0;
     document.querySelectorAll('#nos-extras-tbody tr').forEach(tr => {
-        const val = parseFloat(tr.querySelectorAll('input')[1]?.value) || 0;
+        const inputs = tr.querySelectorAll('input');
+        const val = parseFloat(inputs[1]?.value) || 0;
         const who = tr.querySelector('select')?.value;
-        if (who === 'gabriel') gPaid += val;
-        else if (who === 'luah') lPaid += val;
+        const shouldSplit = inputs[2]?.checked !== false;
+        if (shouldSplit) {
+            if (who === 'gabriel') gPaid += val;
+            else if (who === 'luah') lPaid += val;
+        }
     });
     document.getElementById('nos-g-paid').textContent = fmt(gPaid);
     document.getElementById('nos-l-paid').textContent = fmt(lPaid);
@@ -1307,7 +1423,7 @@ async function saveNosMonth() {
     document.querySelectorAll('#nos-extras-tbody tr').forEach(tr => {
         const ins = tr.querySelectorAll('input');
         const sel = tr.querySelector('select');
-        extras.push({ name: ins[0].value, val: parseFloat(ins[1].value)||0, paidBy: sel?.value || '' });
+        extras.push({ name: ins[0].value, val: parseFloat(ins[1].value)||0, paidBy: sel?.value || '', split: ins[2]?.checked !== false });
     });
     await saveToDb('nos_' + m, { billVals, extras });
 }
@@ -1358,10 +1474,16 @@ function updateDivision(tb) {
                 document.getElementById('l-pct').textContent = (li/ti*100).toFixed(1) + '%';
                 document.getElementById('g-amount').textContent = fmt(tb*(gi/ti));
                 document.getElementById('l-amount').textContent = fmt(tb*(li/ti));
+                const explainEl = document.getElementById('nos-division-explain');
+                if (explainEl && tb > 0) {
+                    explainEl.textContent = `Gabriel recebe ${fmt(gi)} (${(gi/ti*100).toFixed(1)}% da renda total) e Luah recebe ${fmt(li)} (${(li/ti*100).toFixed(1)}%). Por isso, do total de ${fmt(tb)} em contas: Gabriel paga ${fmt(tb*gi/ti)} e Luah paga ${fmt(tb*li/ti)}.`;
+                } else if (explainEl) { explainEl.textContent = ''; }
             } else {
                 nosPropG = 0.5; nosPropL = 0.5;
                 ['g-pct','l-pct'].forEach(id => document.getElementById(id).textContent = '0%');
                 ['g-amount','l-amount'].forEach(id => document.getElementById(id).textContent = fmt(0));
+                const explainEl = document.getElementById('nos-division-explain');
+                if (explainEl) explainEl.textContent = '';
             }
             updateFixedSplits();
         });
@@ -1384,10 +1506,125 @@ async function loadNos() {
     });
 
     document.getElementById('nos-extras-tbody').innerHTML = '';
-    (monthData.extras || []).forEach(e => addNosExtraRow(e.name, e.val, e.paidBy || ''));
+    (monthData.extras || []).forEach(e => addNosExtraRow(e.name, e.val, e.paidBy || '', e.split !== false));
 
     await calcNos();
     showStatus('');
+}
+
+// ---- INVEST RECOMMENDATION ----
+
+function updateInvestRecommendation(who, totalInvested) {
+    const tiers = document.querySelectorAll(`#${who}-tiers .tier-btn`);
+    tiers.forEach(b => {
+        b.classList.remove('recommended');
+        const badge = b.querySelector('.tier-badge');
+        if (badge) badge.remove();
+    });
+    let recIdx;
+    if (totalInvested < 10000) recIdx = 0;
+    else if (totalInvested < 50000) recIdx = 1;
+    else recIdx = 2;
+    tiers[recIdx].classList.add('recommended');
+    const badge = document.createElement('span');
+    badge.className = 'tier-badge';
+    badge.textContent = 'Recomendado';
+    tiers[recIdx].insertBefore(badge, tiers[recIdx].firstChild);
+}
+
+// ---- NOS SHARE IN INDIVIDUAL ----
+
+async function loadNosShare(who) {
+    const m = document.getElementById(who + '-month').value;
+    const otherPrefix = who === 'gabriel' ? 'l' : 'g';
+    const [nosFixed, nosMonth, otherData] = await Promise.all([
+        loadFromDb('nos_fixed'),
+        loadFromDb('nos_' + m),
+        loadFromDb(otherPrefix + '_' + m)
+    ]);
+    const myIncome = parseFloat(document.getElementById(who + '-income').value) || 0;
+    const otherIncome = otherData.income || 0;
+    const totalIncome = myIncome + otherIncome;
+    const myProp = totalIncome > 0 ? myIncome / totalIncome : 0.5;
+    const container = document.getElementById(who + '-nos-share');
+    const bills = nosFixed.bills || [];
+    if (bills.length === 0) {
+        container.innerHTML = '<p style="color:#aaa;font-size:0.85rem;padding:4px 0">Nenhuma conta da casa cadastrada ainda.</p>';
+        return;
+    }
+    let total = 0, html = '';
+    bills.forEach(b => {
+        const override = nosMonth.billVals?.[b.name];
+        const val = override !== undefined ? override.val : b.defaultVal;
+        const myShare = val * myProp;
+        total += myShare;
+        html += `<div class="nos-share-row"><span>${b.name}</span><span>${fmt(myShare)}</span></div>`;
+    });
+    html += `<div class="nos-share-total"><span>Total sua parte</span><span>${fmt(total)}</span></div>`;
+    const pctText = totalIncome > 0
+        ? `Baseado em ${(myProp*100).toFixed(1)}% da renda total do casal`
+        : 'Adicione sua renda e a da outra pessoa para calcular a proporção';
+    html += `<p style="font-size:0.78rem;color:#aaa;margin-top:8px">${pctText}</p>`;
+    container.innerHTML = html;
+}
+
+// ---- ANÁLISE DOS GASTOS ----
+
+function updateAnalysis(who) {
+    const container = document.getElementById(who + '-analysis');
+    if (!container) return;
+    const income = parseFloat(document.getElementById(who + '-income').value) || 0;
+    if (income === 0) {
+        container.innerHTML = '<p style="color:#aaa;font-size:0.85rem">Adicione sua renda do mês para ver a análise.</p>';
+        return;
+    }
+    let fixed = 0;
+    document.querySelectorAll(`#${who}-fixed-tbody tr`).forEach(tr => {
+        fixed += parseFloat(tr.querySelectorAll('input')[1]?.value) || 0;
+    });
+    const catTotals = {};
+    CATS.forEach(c => catTotals[c] = 0);
+    document.querySelectorAll(`#${who}-tbody tr`).forEach(tr => {
+        const ins = tr.querySelectorAll('input,select');
+        const cat = ins[1]?.value;
+        const val = parseFloat(ins[4]?.value) || 0;
+        if (cat) catTotals[cat] = (catTotals[cat] || 0) + val;
+    });
+    const totalVar = Object.values(catTotals).reduce((a,b) => a+b, 0);
+    const investment = parseFloat(document.getElementById(who + '-investment').value) || 0;
+    const totalSpent = fixed + totalVar + investment;
+    const saldo = income - totalSpent;
+    const investRate = income > 0 ? (investment / income * 100) : 0;
+    const varRate = income > 0 ? (totalVar / income * 100) : 0;
+    const biggestCat = Object.entries(catTotals).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1])[0];
+
+    let html = '';
+    // Gastos variáveis
+    html += `<div class="analysis-item"><span>Gastos variáveis: <strong>${varRate.toFixed(1)}%</strong> da renda${varRate > 50 ? ' — acima do ideal.' : varRate > 30 ? ' — controle razoável.' : varRate > 0 ? ' — ótimo controle!' : '.'}</span>`;
+    if (biggestCat) {
+        const pct = totalVar > 0 ? (biggestCat[1]/totalVar*100).toFixed(0) : 0;
+        html += `<p class="analysis-tip">Maior categoria: ${biggestCat[0]} (${pct}% dos gastos variáveis, ${fmt(biggestCat[1])})</p>`;
+    }
+    html += `</div>`;
+    // Investimento
+    html += `<div class="analysis-item">`;
+    if (investRate >= 20) html += `<span>Investindo <strong>${investRate.toFixed(1)}%</strong> da renda — excelente!</span>`;
+    else if (investRate >= 10) html += `<span>Investindo <strong>${investRate.toFixed(1)}%</strong> da renda — bom começo. Tente chegar a 20%.</span>`;
+    else if (investRate > 0) html += `<span>Investindo <strong>${investRate.toFixed(1)}%</strong> — tente manter pelo menos 10%.</span>`;
+    else html += `<span>Nenhum investimento registrado este mês.</span>`;
+    html += `</div>`;
+    // Saldo
+    html += `<div class="analysis-item">`;
+    if (saldo > 0) html += `<span>Saldo livre: <strong style="color:#4a9d5a">${fmt(saldo)}</strong> (${(saldo/income*100).toFixed(1)}% da renda)</span>`;
+    else html += `<span style="color:#e94560">Saldo <strong>negativo</strong>: ${fmt(Math.abs(saldo))}. Revise os gastos.</span>`;
+    html += `</div>`;
+    // Dica
+    const tip = investRate < 10 && income > 0 ? '💡 Priorize guardar pelo menos 10% da renda antes de gastar.'
+        : saldo > 0 && investRate < 20 ? '💡 Tem saldo sobrando! Considere aumentar o valor investido.'
+        : varRate > 40 ? '💡 Gastos variáveis altos. Veja qual categoria está pesando mais e tente reduzir.'
+        : '💡 Suas finanças estão bem equilibradas. Continue assim!';
+    html += `<div class="analysis-item"><p class="analysis-tip">${tip}</p></div>`;
+    container.innerHTML = html;
 }
 
 // ---- TEMA ----
