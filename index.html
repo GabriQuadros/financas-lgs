@@ -342,6 +342,7 @@
         .nos-share-total { display: flex; justify-content: space-between; font-weight: 700; padding-top: 10px; margin-top: 10px; border-top: 2px solid #eee; font-size: 0.92rem; }
         body.dark .nos-share-row { border-bottom-color: #181830; }
         body.dark .nos-share-total { border-top-color: #1e1e38; }
+        body.dark #gabriel-nos-share, body.dark #luah-nos-share { border-top-color: #1e1e38 !important; }
 
         /* DIVISION EXPLANATION */
         .division-explain { font-size: 0.8rem; color: #888; text-align: center; margin-top: 12px; line-height: 1.55; padding: 0 8px; }
@@ -447,6 +448,10 @@
                     </tfoot>
                 </table></div>
                 <button class="btn-add" onclick="addFixedRow('gabriel')">+ Adicionar conta fixa</button>
+                <div id="gabriel-nos-share" style="margin-top:16px;padding-top:14px;border-top:1px solid #f0f0f0">
+                    <div style="font-size:0.76rem;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px">Sua parte nas contas da casa</div>
+                    <p style="color:#aaa;font-size:0.85rem">Carregando...</p>
+                </div>
             </div>
             <div class="card">
                 <div class="card-title">Gastos do mês</div>
@@ -510,11 +515,6 @@
                     <canvas id="gabriel-chart"></canvas>
                     <div id="gabriel-chart-empty" class="chart-empty" style="display:none">Nenhum gasto registrado ainda</div>
                 </div>
-            </div>
-            <div class="card">
-                <div class="card-title">Sua parte nas contas da casa</div>
-                <p class="card-hint">Calculado com base na divisão proporcional da renda</p>
-                <div id="gabriel-nos-share"><p style="color:#aaa;font-size:0.85rem">Carregando...</p></div>
             </div>
             <div class="card">
                 <div class="card-title">Análise dos gastos</div>
@@ -581,6 +581,10 @@
                     </tfoot>
                 </table></div>
                 <button class="btn-add" onclick="addFixedRow('luah')">+ Adicionar conta fixa</button>
+                <div id="luah-nos-share" style="margin-top:16px;padding-top:14px;border-top:1px solid #f0f0f0">
+                    <div style="font-size:0.76rem;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px">Sua parte nas contas da casa</div>
+                    <p style="color:#aaa;font-size:0.85rem">Carregando...</p>
+                </div>
             </div>
             <div class="card">
                 <div class="card-title">Gastos do mês</div>
@@ -644,11 +648,6 @@
                     <canvas id="luah-chart"></canvas>
                     <div id="luah-chart-empty" class="chart-empty" style="display:none">Nenhum gasto registrado ainda</div>
                 </div>
-            </div>
-            <div class="card">
-                <div class="card-title">Sua parte nas contas da casa</div>
-                <p class="card-hint">Calculado com base na divisão proporcional da renda</p>
-                <div id="luah-nos-share"><p style="color:#aaa;font-size:0.85rem">Carregando...</p></div>
             </div>
             <div class="card">
                 <div class="card-title">Análise dos gastos</div>
@@ -890,7 +889,7 @@ function fillMonths(id) {
     const sel = document.getElementById(id);
     const now = new Date();
     sel.innerHTML = '';
-    for (let i = 5; i >= -2; i--) {
+    for (let i = 6; i >= -12; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
         const opt = document.createElement('option');
@@ -982,7 +981,7 @@ function addRow(who, date='', cat='', desc='', val='', parcelas=1, parcelaAtual=
     const tbody = document.getElementById(who + '-tbody');
     const tr = document.createElement('tr');
     const isFollowup = parcelaAtual > 1;
-    const pid = parcelaId || (parcelas > 1 && !isFollowup ? `p${Date.now()}${Math.floor(Math.random()*9999)}` : '');
+    const pid = parcelaId || (!isFollowup ? `p${Date.now()}${Math.floor(Math.random()*9999)}` : '');
     tr.dataset.parcelaAtual = parcelaAtual;
     tr.dataset.parcelaId = pid;
     const parcelasCell = isFollowup
