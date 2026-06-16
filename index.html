@@ -817,12 +817,14 @@ auth.onAuthStateChanged(user => {
 
         if (isGabriel) {
             fillMonths('gabriel-month');
-            loadFixed('gabriel');
             switchTab('gabriel');
+            loadFixed('gabriel');
+            loadGabriel();
         } else if (isLuah) {
             fillMonths('luah-month');
-            loadFixed('luah');
             switchTab('luah');
+            loadFixed('luah');
+            loadLuah();
         }
     } else {
         currentUserEmail = null;
