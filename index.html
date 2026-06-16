@@ -1014,47 +1014,81 @@ function calcTotal(who) {
     calcSaldo(who);
 }
 
-function debounceSaveExpenses(who) {
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => saveExpenses(who), 1000);
+function monthDiff(from, to) {
+    const [fy, fm] = from.split('-').map(Number);
+    const [ty, tm] = to.split('-').map(Number);
+    return (ty - fy) * 12 + (tm - fm);
 }
 
-async function saveExpenses(who) {
+function debounceSaveExpenses(who) {
+    const capturedMonth = document.getElementById(who + '-month').value;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => saveExpenses(who, capturedMonth), 1000);
+}
+
+async function saveExpenses(who, capturedMonth) {
     const prefix = who === 'gabriel' ? 'g' : 'l';
-    const m = document.getElementById(who + '-month').value;
+    const m = capturedMonth || document.getElementById(who + '-month').value;
     const d = await loadFromDb(prefix + '_' + m);
     const expenses = [];
+    const installmentSources = [];
     document.querySelectorAll(`#${who}-tbody tr`).forEach(tr => {
-        expenses.push(getExpenseFromRow(tr));
+        if (tr.dataset.installment === 'true') return;
+        const exp = getExpenseFromRow(tr);
+        expenses.push(exp);
+        if (exp.parcelas > 1 && exp.parcelaAtual === 1 && exp.parcelaId) {
+            installmentSources.push(exp);
+        }
     });
     d.expenses = expenses;
     await saveToDb(prefix + '_' + m, d);
-    await propagateInstallments(prefix, m, expenses);
+    await updateInstallmentsCollection(prefix, m, installmentSources);
 }
 
-async function propagateInstallments(prefix, currentMonth, expenses) {
-    const originals = expenses.filter(e => e.parcelas > 1 && e.parcelaAtual === 1 && e.parcelaId);
-    for (const exp of originals) {
-        for (let p = 2; p <= exp.parcelas; p++) {
-            const futureMonth = addMonthsToKey(currentMonth, p - 1);
-            const futureKey = prefix + '_' + futureMonth;
-            const futureData = await loadFromDb(futureKey);
-            const existing = (futureData.expenses || []).filter(e => e.parcelaId !== exp.parcelaId);
-            existing.push({ date: exp.date, cat: exp.cat, desc: exp.desc, val: exp.val, parcelas: exp.parcelas, parcelaAtual: p, parcelaId: exp.parcelaId });
-            futureData.expenses = existing;
-            await saveToDb(futureKey, futureData);
-        }
-    }
+async function updateInstallmentsCollection(prefix, currentMonth, sources) {
+    const instData = await loadFromDb(prefix + '_installments');
+    let items = (instData.items || []).filter(it => it.startMonth !== currentMonth);
+    sources.forEach(e => {
+        items.push({ id: e.parcelaId, date: e.date, cat: e.cat, desc: e.desc, val: e.val, startMonth: currentMonth, parcelas: e.parcelas });
+    });
+    await saveToDb(prefix + '_installments', { items });
+}
+
+function addInstallmentRow(who, item, parcelaAtual) {
+    const tbody = document.getElementById(who + '-tbody');
+    const tr = document.createElement('tr');
+    tr.dataset.installment = 'true';
+    tr.dataset.installmentId = item.id;
+    tr.dataset.parcelaAtual = parcelaAtual;
+    tr.style.opacity = '0.78';
+    tr.innerHTML = `
+        <td><input type="date" value="${item.date}" disabled></td>
+        <td><select disabled>${CATS.map(c=>`<option${c===item.cat?' selected':''}>${c}</option>`).join('')}</select></td>
+        <td>
+            <input type="text" value="${item.desc}" disabled>
+            <div class="parcela-badge">Parcela ${parcelaAtual}/${item.parcelas}</div>
+        </td>
+        <td><input type="number" value="${item.parcelas}" style="width:50px;text-align:center;opacity:0.5" disabled></td>
+        <td><input type="number" value="${item.val}" disabled></td>
+        <td></td>
+    `;
+    tbody.appendChild(tr);
 }
 
 async function loadGabriel() {
     const m = document.getElementById('gabriel-month').value;
     showStatus('Carregando...', '#aaa');
-    const d = await loadFromDb('g_' + m);
+    const [d, instData] = await Promise.all([loadFromDb('g_' + m), loadFromDb('g_installments')]);
     document.getElementById('gabriel-income').value = d.income || '';
     document.getElementById('gabriel-investment').value = d.investment || '';
     document.getElementById('gabriel-tbody').innerHTML = '';
-    (d.expenses || []).forEach(e => addRow('gabriel', e.date, e.cat, e.desc, e.val, e.parcelas||1, e.parcelaAtual||1, e.parcelaId||''));
+    // Regular expenses (parcelaAtual=1 only — skip old propagated rows for backward compat)
+    (d.expenses || []).filter(e => (e.parcelaAtual || 1) === 1).forEach(e => addRow('gabriel', e.date, e.cat, e.desc, e.val, e.parcelas||1, 1, e.parcelaId||''));
+    // Dynamic installments from collection
+    (instData.items || []).forEach(it => {
+        const elapsed = monthDiff(it.startMonth, m);
+        if (elapsed >= 1 && elapsed < it.parcelas) addInstallmentRow('gabriel', it, elapsed + 1);
+    });
     calcTotal('gabriel');
     updateTierValues('gabriel');
     await loadStats('gabriel');
@@ -1079,12 +1113,15 @@ async function saveLuahIncome() {
 async function loadLuah() {
     const m = document.getElementById('luah-month').value;
     showStatus('Carregando...', '#aaa');
-    const d = await loadFromDb('l_' + m);
+    const [d, instData] = await Promise.all([loadFromDb('l_' + m), loadFromDb('l_installments')]);
     document.getElementById('luah-income').value = d.income || '';
     document.getElementById('luah-investment').value = d.investment || '';
     document.getElementById('luah-tbody').innerHTML = '';
-
-    (d.expenses || []).forEach(e => addRow('luah', e.date, e.cat, e.desc, e.val, e.parcelas||1, e.parcelaAtual||1, e.parcelaId||''));
+    (d.expenses || []).filter(e => (e.parcelaAtual || 1) === 1).forEach(e => addRow('luah', e.date, e.cat, e.desc, e.val, e.parcelas||1, 1, e.parcelaId||''));
+    (instData.items || []).forEach(it => {
+        const elapsed = monthDiff(it.startMonth, m);
+        if (elapsed >= 1 && elapsed < it.parcelas) addInstallmentRow('luah', it, elapsed + 1);
+    });
     calcTotal('luah');
     updateTierValues('luah');
     await loadStats('luah');
