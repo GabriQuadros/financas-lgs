@@ -1386,25 +1386,31 @@ function addNosExtraRow(name='', val='', paidBy='', split=true) {
 }
 
 function calcExtrasBalance() {
-    let gPaid = 0, lPaid = 0;
+    let gSplit = 0, lSplit = 0, gFull = 0, lFull = 0;
     document.querySelectorAll('#nos-extras-tbody tr').forEach(tr => {
         const inputs = tr.querySelectorAll('input');
         const val = parseFloat(inputs[1]?.value) || 0;
         const who = tr.querySelector('select')?.value;
         const shouldSplit = inputs[2]?.checked !== false;
         if (shouldSplit) {
-            if (who === 'gabriel') gPaid += val;
-            else if (who === 'luah') lPaid += val;
+            if (who === 'gabriel') gSplit += val;
+            else if (who === 'luah') lSplit += val;
+        } else {
+            // Não dividir: cobra valor inteiro da outra pessoa
+            if (who === 'gabriel') gFull += val;
+            else if (who === 'luah') lFull += val;
         }
     });
-    document.getElementById('nos-g-paid').textContent = fmt(gPaid);
-    document.getElementById('nos-l-paid').textContent = fmt(lPaid);
 
-    // Divisão 50/50: saldo = (quem pagou mais - quem pagou menos) / 2
-    const balance = (gPaid - lPaid) / 2;
+    document.getElementById('nos-g-paid').textContent = fmt(gSplit + gFull);
+    document.getElementById('nos-l-paid').textContent = fmt(lSplit + lFull);
+
+    // Saldo: 50/50 nos divididos + 100% nos não divididos (cobrado da outra pessoa)
+    const balance = (gSplit - lSplit) / 2 + gFull - lFull;
     const el = document.getElementById('nos-balance-result');
+    const total = gSplit + lSplit + gFull + lFull;
 
-    if (gPaid === 0 && lPaid === 0) {
+    if (total === 0) {
         el.textContent = 'Nenhum gasto registrado';
         el.style.color = '#aaa';
         el.style.background = '';
