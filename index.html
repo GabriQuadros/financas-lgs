@@ -701,24 +701,25 @@
                 <button class="btn-add" onclick="addNosFixedRow()">+ Adicionar conta da casa</button>
             </div>
             <div class="card">
-                <div class="card-title">Gastos extras do mês</div>
-                <p class="card-hint">Somente para este mês — marque "Dividir?" para incluir no acerto 50/50</p>
+                <div class="card-title">Gastos extras</div>
+                <p class="card-hint">Aparecem todo mês até marcar como pago — "Dividir?" inclui no acerto 50/50</p>
                 <div class="table-scroll"><table>
                     <thead>
                         <tr>
                             <th>Descrição</th>
-                            <th style="width:110px">Valor (R$)</th>
-                            <th style="width:110px">Quem pagou</th>
-                            <th style="width:65px;text-align:center">Dividir?</th>
+                            <th style="width:100px">Valor (R$)</th>
+                            <th style="width:100px">Quem pagou</th>
+                            <th style="width:60px;text-align:center">Dividir?</th>
+                            <th style="width:55px;text-align:center">Pago?</th>
                             <th style="width:40px"></th>
                         </tr>
                     </thead>
                     <tbody id="nos-extras-tbody"></tbody>
                     <tfoot>
                         <tr>
-                            <td>Total extras</td>
+                            <td>Total pendente</td>
                             <td id="nos-extras-total">R$ 0,00</td>
-                            <td colspan="3"></td>
+                            <td colspan="4"></td>
                         </tr>
                     </tfoot>
                 </table></div>
@@ -1339,6 +1340,7 @@ async function updateChart(who) {
 
 let nosFixedTimer = null;
 let nosMonthTimer = null;
+let nosExtrasTimer = null;
 let nosPropG = 0.5;
 let nosPropL = 0.5;
 
@@ -1367,22 +1369,55 @@ function updateFixedSplits() {
     });
 }
 
-function addNosExtraRow(name='', val='', paidBy='', split=true) {
+function addNosExtraRow(id='', name='', val='', paidBy='', split=true, isPaid=false, addedMonth='') {
+    const currentMonth = document.getElementById('nos-month').value;
     const tbody = document.getElementById('nos-extras-tbody');
     const tr = document.createElement('tr');
+    const eid = id || `e${Date.now()}${Math.floor(Math.random()*9999)}`;
+    tr.dataset.extraId = eid;
+    tr.dataset.addedMonth = addedMonth || currentMonth;
+    if (isPaid) { tr.style.opacity = '0.55'; tr.style.textDecoration = 'line-through'; }
     tr.innerHTML = `
-        <td><input type="text" value="${name}" placeholder="Ex: Jantar" oninput="debounceSaveNosMonth()"></td>
-        <td><input type="number" value="${val}" placeholder="0,00" step="0.01" oninput="debounceSaveNosMonth();calcNosTotal()"></td>
-        <td><select onchange="debounceSaveNosMonth();calcExtrasBalance()">
+        <td><input type="text" value="${name}" placeholder="Ex: Mercado" oninput="debounceSaveNosExtras()"></td>
+        <td><input type="number" value="${val}" placeholder="0,00" step="0.01" oninput="debounceSaveNosExtras();calcNosTotal()"></td>
+        <td><select onchange="debounceSaveNosExtras();calcExtrasBalance()">
             <option value="">—</option>
             <option value="gabriel" ${paidBy==='gabriel'?'selected':''}>Gabriel</option>
             <option value="luah" ${paidBy==='luah'?'selected':''}>Luah</option>
         </select></td>
-        <td style="text-align:center"><input type="checkbox" ${split?'checked':''} onchange="debounceSaveNosMonth();calcExtrasBalance()" title="Incluir no acerto 50/50"></td>
-        <td><button class="btn-remove" onclick="this.closest('tr').remove();debounceSaveNosMonth();calcNosTotal()">✕</button></td>
+        <td style="text-align:center"><input type="checkbox" ${split?'checked':''} onchange="debounceSaveNosExtras();calcExtrasBalance()" title="Incluir no acerto 50/50"></td>
+        <td style="text-align:center"><input type="checkbox" ${isPaid?'checked':''} onchange="const r=this.closest('tr');r.style.opacity=this.checked?'0.55':'1';r.style.textDecoration=this.checked?'line-through':'none';debounceSaveNosExtras();calcExtrasBalance()" title="Marcar como pago"></td>
+        <td><button class="btn-remove" onclick="this.closest('tr').remove();debounceSaveNosExtras();calcNosTotal()">✕</button></td>
     `;
     tbody.appendChild(tr);
     calcNosTotal();
+}
+
+function debounceSaveNosExtras() {
+    clearTimeout(nosExtrasTimer);
+    nosExtrasTimer = setTimeout(saveNosExtras, 1000);
+}
+
+async function saveNosExtras() {
+    const currentMonth = document.getElementById('nos-month').value;
+    const extrasData = await loadFromDb('nos_extras_persistent');
+    // Keep items from other months
+    let items = (extrasData.items || []).filter(it => it.addedMonth !== currentMonth);
+    // Add current month's items from DOM
+    document.querySelectorAll('#nos-extras-tbody tr').forEach(tr => {
+        const inputs = tr.querySelectorAll('input');
+        const sel = tr.querySelector('select');
+        items.push({
+            id: tr.dataset.extraId || `e${Date.now()}`,
+            name: inputs[0]?.value || '',
+            val: parseFloat(inputs[1]?.value) || 0,
+            paidBy: sel?.value || '',
+            split: inputs[2]?.checked !== false,
+            paidMonth: inputs[3]?.checked ? currentMonth : null,
+            addedMonth: tr.dataset.addedMonth || currentMonth
+        });
+    });
+    await saveToDb('nos_extras_persistent', { items });
 }
 
 function calcExtrasBalance() {
@@ -1392,11 +1427,12 @@ function calcExtrasBalance() {
         const val = parseFloat(inputs[1]?.value) || 0;
         const who = tr.querySelector('select')?.value;
         const shouldSplit = inputs[2]?.checked !== false;
+        const isPaid = inputs[3]?.checked === true;
+        if (isPaid) return; // Pago = não entra no acerto
         if (shouldSplit) {
             if (who === 'gabriel') gSplit += val;
             else if (who === 'luah') lSplit += val;
         } else {
-            // Não dividir: cobra valor inteiro da outra pessoa
             if (who === 'gabriel') gFull += val;
             else if (who === 'luah') lFull += val;
         }
@@ -1473,13 +1509,7 @@ async function saveNosMonth() {
         const name = ins[0].value;
         if (name) billVals[name] = { val: parseFloat(ins[1].value)||0, paid: ins[2].checked };
     });
-    const extras = [];
-    document.querySelectorAll('#nos-extras-tbody tr').forEach(tr => {
-        const ins = tr.querySelectorAll('input');
-        const sel = tr.querySelector('select');
-        extras.push({ name: ins[0].value, val: parseFloat(ins[1].value)||0, paidBy: sel?.value || '', split: ins[2]?.checked !== false });
-    });
-    await saveToDb('nos_' + m, { billVals, extras });
+    await saveToDb('nos_' + m, { billVals });
 }
 
 async function calcNos() {
@@ -1554,7 +1584,12 @@ async function loadNos() {
     });
 
     document.getElementById('nos-extras-tbody').innerHTML = '';
-    (monthData.extras || []).forEach(e => addNosExtraRow(e.name, e.val, e.paidBy || '', e.split !== false));
+    const extrasData = await loadFromDb('nos_extras_persistent');
+    (extrasData.items || []).forEach(it => {
+        if (it.addedMonth > m) return; // adicionado no futuro, não mostrar
+        const paidOk = !it.paidMonth || it.paidMonth === m;
+        if (paidOk) addNosExtraRow(it.id, it.name, it.val, it.paidBy||'', it.split !== false, it.paidMonth === m, it.addedMonth);
+    });
 
     await calcNos();
     showStatus('');
