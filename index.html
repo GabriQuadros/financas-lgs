@@ -1350,7 +1350,7 @@ function addNosFixedRow(name='', val='', paid=false) {
     const v = parseFloat(val) || 0;
     tr.innerHTML = `
         <td><input type="text" value="${name}" placeholder="Ex: Aluguel" oninput="debounceSaveNosFixed()"></td>
-        <td><input type="number" value="${val}" placeholder="0,00" step="0.01" oninput="debounceSaveNosMonth();calcNosTotal()"></td>
+        <td><input type="number" value="${val}" placeholder="0,00" step="0.01" oninput="debounceSaveNosFixed();calcNosTotal()"></td>
         <td class="split-cell" id="">${fmt(v * nosPropG)}</td>
         <td class="split-cell">${fmt(v * nosPropL)}</td>
         <td style="text-align:center"><input type="checkbox" ${paid?'checked':''} onchange="debounceSaveNosMonth()"></td>
